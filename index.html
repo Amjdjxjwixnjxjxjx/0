@@ -21,206 +21,54 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow: hidden;
-            height: 100vh;
-            height: 100dvh;
-            user-select: none;
-            -webkit-user-select: none;
+            background-color: var(--bg-color); color: var(--text-main);
+            overflow: hidden; height: 100vh; height: 100dvh;
+            user-select: none; -webkit-user-select: none;
         }
 
-        #app {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
-        }
-
-        .header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card-bg);
-            flex-shrink: 0;
-        }
-
-        .header h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, var(--accent), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .views-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            position: relative;
-        }
-
-        .view {
-            display: none;
-            padding: 20px;
-            flex-direction: column;
-            gap: 20px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .view.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .nav-bottom {
-            display: flex;
-            justify-content: space-around;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-            padding: 10px 0;
-            flex-shrink: 0;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            transition: color 0.2s;
-            font-family: inherit;
-            min-width: 50px;
-        }
-
-        .nav-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        .nav-btn.active {
-            color: var(--accent);
-        }
-
-        .btn {
-            background: linear-gradient(45deg, var(--accent), #0099ff);
-            color: #000;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.1s, opacity 0.2s;
-            font-family: inherit;
-        }
-
+        #app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+        .header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); flex-shrink: 0; }
+        .header h1 { font-size: 1.2rem; font-weight: 700; background: linear-gradient(45deg, var(--accent), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .views-container { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; }
+        .view { display: none; padding: 20px; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
+        .view.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .nav-bottom { display: flex; justify-content: space-around; background: var(--card-bg); border-top: 1px solid var(--border); padding: 10px 0; flex-shrink: 0; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: color 0.2s; font-family: inherit; min-width: 50px; }
+        .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-btn.active { color: var(--accent); }
+        .btn { background: linear-gradient(45deg, var(--accent), #0099ff); color: #000; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%; transition: transform 0.1s, opacity 0.2s; font-family: inherit; }
         .btn:active { transform: scale(0.98); }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-secondary { background: var(--border); color: var(--text-main); }
         .btn-danger { background: linear-gradient(45deg, var(--accent-2), #cc0044); color: #fff; }
-
         .row { display: flex; gap: 10px; align-items: center; }
         .col { display: flex; flex-direction: column; gap: 10px; }
         .label { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 5px; display: block; }
         .value-big { font-size: 2.5rem; font-weight: 800; color: var(--accent); text-align: center; }
-
-        .meter-container {
-            width: 100%; height: 12px; background: var(--bg-color);
-            border-radius: 6px; position: relative; margin: 10px 0; overflow: hidden;
-        }
-
-        .meter-bar {
-            position: absolute; top: 0; bottom: 0; left: 50%; width: 0;
-            background: var(--success); transition: width 0.1s, background 0.2s; border-radius: 6px;
-        }
-
-        .meter-center {
-            position: absolute; top: 0; bottom: 0; left: 50%; width: 2px;
-            background: rgba(255,255,255,0.5); transform: translateX(-50%); z-index: 2;
-        }
-
-        canvas {
-            width: 100%; height: 150px; background: var(--bg-color);
-            border-radius: 8px; display: block;
-        }
-
-        select, input {
-            background: var(--bg-color);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1rem;
-            width: 100%;
-            font-family: inherit;
-        }
-
-        .overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95); z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            padding: 20px; flex-direction: column; gap: 20px; text-align: center; overflow-y: auto;
-        }
-
+        .meter-container { width: 100%; height: 12px; background: var(--bg-color); border-radius: 6px; position: relative; margin: 10px 0; overflow: hidden; }
+        .meter-bar { position: absolute; top: 0; bottom: 0; left: 50%; width: 0; background: var(--success); transition: width 0.1s, background 0.2s; border-radius: 6px; }
+        .meter-center { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: rgba(255,255,255,0.5); transform: translateX(-50%); z-index: 2; }
+        canvas { width: 100%; height: 150px; background: var(--bg-color); border-radius: 8px; display: block; }
+        select, input { background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); padding: 12px; border-radius: 8px; font-size: 1rem; width: 100%; font-family: inherit; }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; flex-direction: column; gap: 20px; text-align: center; overflow-y: auto; }
         .hidden { display: none !important; }
-
-        .status-box {
-            padding: 12px; border-radius: 8px; background: var(--bg-color);
-            text-align: center; font-size: 0.9rem; color: var(--text-muted);
-        }
-
+        .status-box { padding: 12px; border-radius: 8px; background: var(--bg-color); text-align: center; font-size: 0.9rem; color: var(--text-muted); }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .stat-item { background: var(--bg-color); padding: 15px; border-radius: 8px; text-align: center; }
         .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; }
         .stat-value { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
-
         .table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         .table th, .table td { padding: 10px; text-align: center; border-bottom: 1px solid var(--border); }
         .table th { color: var(--accent); }
-
-        .analysis-text {
-            line-height: 1.6; color: var(--text-main); background: var(--bg-color);
-            padding: 15px; border-radius: 8px; border-right: 4px solid var(--accent);
-        }
-
+        .analysis-text { line-height: 1.6; color: var(--text-main); background: var(--bg-color); padding: 15px; border-radius: 8px; border-right: 4px solid var(--accent); }
         .pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
-        }
-
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); } }
         .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .badge-success { background: rgba(0,255,136,0.2); color: var(--success); }
         .badge-warning { background: rgba(255,170,0,0.2); color: var(--warning); }
@@ -252,12 +100,10 @@
             <div class="card">
                 <div class="value-big" id="tunerNote">--</div>
                 <div style="text-align:center; color:var(--text-muted); margin-top:5px;" id="tunerOctave">--</div>
-                
                 <div style="margin-top:20px;">
                     <span class="label">فرکانس (Hz)</span>
                     <div id="tunerFreq" style="font-size:1.2rem; text-align:center;">0.00</div>
                 </div>
-
                 <div style="margin-top:20px;">
                     <span class="label">اختلاف (Cents)</span>
                     <div class="meter-container">
@@ -266,36 +112,22 @@
                     </div>
                     <div style="text-align:center; font-weight:bold;" id="tunerCents">0</div>
                 </div>
-
                 <div class="stat-grid" style="margin-top:20px;">
-                    <div class="stat-item">
-                        <div class="stat-label">اطمینان (Confidence)</div>
-                        <div class="stat-value" id="tunerConfidence">0%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">وضعیت</div>
-                        <div class="stat-value" id="tunerStatus" style="font-size:0.9rem;">--</div>
-                    </div>
+                    <div class="stat-item"><div class="stat-label">اطمینان (Confidence)</div><div class="stat-value" id="tunerConfidence">0%</div></div>
+                    <div class="stat-item"><div class="stat-label">وضعیت</div><div class="stat-value" id="tunerStatus" style="font-size:0.9rem;">--</div></div>
                 </div>
             </div>
-
-            <div class="card">
-                <span class="label">نمودار لحظه‌ای پیچ</span>
-                <canvas id="pitchGraph"></canvas>
-            </div>
-
+            <div class="card"><span class="label">نمودار لحظه‌ای پیچ</span><canvas id="pitchGraph"></canvas></div>
             <div class="card">
                 <h3>تمرین تک‌نت (دقت فرکانس)</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">یک نت تصادفی پخش می‌شود. سعی کنید دقیق‌ترین فرکانس را بگیرید. سیستم اکتاو را نادیده می‌گیرد (بند قراردادی).</p>
                 <button class="btn" style="margin-top:15px;" id="btnStartSingleNote">شروع تمرین تک‌نت</button>
             </div>
-
             <div class="card hidden" id="singleNoteListeningCard">
                 <div class="status-box pulse">بخوانید...</div>
                 <canvas id="singleNoteGraph" style="margin-top:15px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopSingleNote">پایان و تحلیل</button>
             </div>
-
             <div class="card hidden" id="singleNoteResultCard">
                 <h3>نتیجه تحلیل تک‌نت</h3>
                 <div id="singleNoteResultContent"></div>
@@ -308,9 +140,7 @@
             <div class="card">
                 <h3>تمرین فاصله تصادفی</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">سیستم دو نت تصادفی پخش می‌کند. شما باید فاصله بین آن‌ها را بخوانید.</p>
-                <div class="row" style="margin-top:15px;">
-                    <button class="btn btn-secondary" style="flex:1;" id="btnPlayLastInterval">پخش مجدد مرجع</button>
-                </div>
+                <div class="row" style="margin-top:15px;"><button class="btn btn-secondary" style="flex:1;" id="btnPlayLastInterval">پخش مجدد مرجع</button></div>
                 <button class="btn" style="margin-top:15px;" id="btnStartInterval">شروع فاصله تصادفی</button>
             </div>
             <div class="card hidden" id="intervalTargetCard">
@@ -365,17 +195,15 @@
                     </div>
                 </div>
                 <button class="btn" style="margin-top:15px;" id="btnStartRandom">تولید و پخش نت‌ها</button>
-                <div class="row" style="margin-top:15px;">
-                    <button class="btn btn-secondary" style="flex:1;" id="btnPlayLastRandom">پخش مجدد مرجع</button>
-                </div>
+                <div class="row" style="margin-top:15px;"><button class="btn btn-secondary" style="flex:1;" id="btnPlayLastRandom">پخش مجدد مرجع</button></div>
             </div>
             <div class="card hidden" id="randomSequenceCard">
                 <span class="label">توالی نت‌ها</span>
                 <div id="randomNotesDisplay" style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;"></div>
             </div>
             <div class="card hidden" id="randomListeningCard">
-                <div class="status-box pulse">بخوانید...</div>
-                <canvas id="randomGraph" style="margin-top:15px;"></canvas>
+                <div class="status-box pulse">صدای خود را با خط سبز روی خط قرمز نگه دارید...</div>
+                <canvas id="randomGraph" style="margin-top:15px; height: 200px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopRandomListening">پایان و تحلیل</button>
             </div>
             <div class="card hidden" id="randomResultCard">
@@ -389,16 +217,10 @@
         <div id="view-dynamic" class="view">
             <div class="card">
                 <h3>تمرین داینامیک (ولوم صدا)</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">
-                    یک نت پخش می‌شود و همزمان یک نمودار قرمز به عنوان "هدف ولوم" روی صفحه رسم می‌شود.
-                    شما باید آن نت را بخوانید و ولوم صدای خود را کم و زیاد کنید تا <b>خط سبز (صدای شما)</b> را دقیقاً روی <b>خط قرمز (هدف)</b> نگه دارید.
-                </p>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">یک نت پخش می‌شود و همزمان یک نمودار قرمز به عنوان "هدف ولوم" روی صفحه رسم می‌شود. شما باید ولوم صدای خود را کم و زیاد کنید تا <b>خط سبز (صدای شما)</b> دقیقاً روی <b>خط قرمز (هدف)</b> قرار گیرد.</p>
                 <button class="btn" style="margin-top:15px;" id="btnStartDynamic">شروع تمرین داینامیک</button>
             </div>
-            <div class="card hidden" id="dynamicTargetCard">
-                <span class="label">نت هدف برای خواندن</span>
-                <div id="dynTargetNote" style="font-size:1.2rem; font-weight:bold;">--</div>
-            </div>
+            <div class="card hidden" id="dynamicTargetCard"><span class="label">نت هدف برای خواندن</span><div id="dynTargetNote" style="font-size:1.2rem; font-weight:bold;">--</div></div>
             <div class="card hidden" id="dynamicListeningCard">
                 <div class="status-box pulse">ولوم صدا را بر اساس نمودار تغییر دهید...</div>
                 <canvas id="dynamicGraph" style="margin-top:15px; height: 200px;"></canvas>
@@ -428,14 +250,8 @@
                     </table>
                 </div>
             </div>
-            <div class="card">
-                <h3>آمار تک‌نت و رندوم نت</h3>
-                <div id="pitchStats" class="stat-grid"></div>
-            </div>
-            <div class="card">
-                <h3>آمار داینامیک</h3>
-                <div id="dynamicStats" class="stat-grid"></div>
-            </div>
+            <div class="card"><h3>آمار تک‌نت و رندوم نت</h3><div id="pitchStats" class="stat-grid"></div></div>
+            <div class="card"><h3>آمار داینامیک</h3><div id="dynamicStats" class="stat-grid"></div></div>
         </div>
 
         <!-- Settings View -->
@@ -443,26 +259,9 @@
             <div class="card">
                 <h3>تنظیمات صدا</h3>
                 <div class="col" style="margin-top:15px;">
-                    <div>
-                        <span class="label">صدای مرجع (Volume)</span>
-                        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5">
-                    </div>
-                    <div>
-                        <span class="label">فرکانس پایه (A4 = ... Hz)</span>
-                        <select id="a4Select">
-                            <option value="440" selected>۴۴۰ Hz</option>
-                            <option value="432">۴۳۲ Hz</option>
-                            <option value="442">۴۴۲ Hz</option>
-                        </select>
-                    </div>
-                    <div>
-                        <span class="label">حساسیت تشخیص میکروفون</span>
-                        <select id="confSelect">
-                            <option value="0.85">بالا (سخت‌گیرانه)</option>
-                            <option value="0.75" selected>متوسط</option>
-                            <option value="0.65">پایین (محیط شلوغ)</option>
-                        </select>
-                    </div>
+                    <div><span class="label">صدای مرجع (Volume)</span><input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5"></div>
+                    <div><span class="label">فرکانس پایه (A4 = ... Hz)</span><select id="a4Select"><option value="440" selected>۴۴۰ Hz</option><option value="432">۴۳۲ Hz</option><option value="442">۴۴۲ Hz</option></select></div>
+                    <div><span class="label">حساسیت تشخیص میکروفون</span><select id="confSelect"><option value="0.85">بالا (سخت‌گیرانه)</option><option value="0.75" selected>متوسط</option><option value="0.65">پایین (محیط شلوغ)</option></select></div>
                 </div>
             </div>
             <div class="card">
@@ -480,39 +279,17 @@
                 <h3>پایان جلسه</h3>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnEndSession">پایان تمرین امروز</button>
             </div>
-            <div class="card hidden" id="sessionReportCard">
-                <h3>گزارش تمرین امروز</h3>
-                <div id="sessionReportContent"></div>
-            </div>
+            <div class="card hidden" id="sessionReportCard"><h3>گزارش تمرین امروز</h3><div id="sessionReportContent"></div></div>
         </div>
-
     </div>
 
     <nav class="nav-bottom">
-        <button class="nav-btn active" data-view="tuner" id="navTuner">
-            <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 0-2 2v10.5a4 4 0 1 0 4 0V4a2 2 0 0 0-2-2z"/></svg>
-            <span>تیونر</span>
-        </button>
-        <button class="nav-btn" data-view="intervals" id="navIntervals">
-            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
-            <span>فواصل</span>
-        </button>
-        <button class="nav-btn" data-view="random" id="navRandom">
-            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-            <span>رندوم نت</span>
-        </button>
-        <button class="nav-btn" data-view="dynamic" id="navDynamic">
-            <svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
-            <span>داینامیک</span>
-        </button>
-        <button class="nav-btn" data-view="analytics" id="navAnalytics">
-            <svg viewBox="0 0 24 24"><path d="M3 17h4v4H3v-4zm6-6h4v10H9V11zm6-6h4v16h-4V5z"/></svg>
-            <span>تحلیل</span>
-        </button>
-        <button class="nav-btn" data-view="settings" id="navSettings">
-            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-            <span>تنظیمات</span>
-        </button>
+        <button class="nav-btn active" data-view="tuner" id="navTuner"><svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 0-2 2v10.5a4 4 0 1 0 4 0V4a2 2 0 0 0-2-2z"/></svg><span>تیونر</span></button>
+        <button class="nav-btn" data-view="intervals" id="navIntervals"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg><span>فواصل</span></button>
+        <button class="nav-btn" data-view="random" id="navRandom"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>رندوم نت</span></button>
+        <button class="nav-btn" data-view="dynamic" id="navDynamic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span>داینامیک</span></button>
+        <button class="nav-btn" data-view="analytics" id="navAnalytics"><svg viewBox="0 0 24 24"><path d="M3 17h4v4H3v-4zm6-6h4v10H9V11zm6-6h4v16h-4V5z"/></svg><span>تحلیل</span></button>
+        <button class="nav-btn" data-view="settings" id="navSettings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>تنظیمات</span></button>
     </nav>
 </div>
 
@@ -523,7 +300,8 @@ const State = {
     settings: { A4: 440, refVolume: 0.5, confThreshold: 0.75 },
     pitchHistory: [], buffer: new Float32Array(4096), 
     exState: 'IDLE', detectedPitches: [], detectedVolumes: [], targetMidi: 0, lastInterval: null, lastRandomSeq: [], 
-    targetDynamicCurve: [], dynamicStartTime: 0, dynamicDuration: 0
+    targetDynamicCurve: [], dynamicStartTime: 0, dynamicDuration: 0,
+    targetRandomCurve: [], randomStartTime: 0, randomTotalDuration: 0
 };
 
 const PERSIAN_NOTES = {
@@ -552,118 +330,43 @@ const SCALES = {
 
 async function initAudio() {
     const errEl = document.getElementById('initError');
-    errEl.innerText = '';
-    errEl.style.display = 'none';
-
+    errEl.innerText = ''; errEl.style.display = 'none';
     try {
         const Ctx = window.AudioContext || window.webkitAudioContext;
         State.audioCtx = new Ctx();
         if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
-    } catch (e) {
-        errEl.style.display = 'block';
-        errEl.innerText = `AudioContext failed: ${e.message}`;
-        return;
-    }
-
+    } catch (e) { errEl.style.display = 'block'; errEl.innerText = `AudioContext failed: ${e.message}`; return; }
     try {
         State.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
-    } catch (e) {
-        errEl.style.display = 'block';
-        errEl.innerText = `Mic Error: ${e.name}. Check browser permissions.`;
-        return;
-    }
-
-    State.refGainNode = State.audioCtx.createGain();
-    State.refGainNode.gain.value = State.settings.refVolume;
-    State.refGainNode.connect(State.audioCtx.destination);
-
+    } catch (e) { errEl.style.display = 'block'; errEl.innerText = `Mic Error: ${e.name}. Check browser permissions.`; return; }
+    State.refGainNode = State.audioCtx.createGain(); State.refGainNode.gain.value = State.settings.refVolume; State.refGainNode.connect(State.audioCtx.destination);
     State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
-    State.analyser = State.audioCtx.createAnalyser();
-    State.analyser.fftSize = 4096; 
-    State.analyser.smoothingTimeConstant = 0;
-    State.micSource.connect(State.analyser);
-
-    document.getElementById('welcomeOverlay').classList.add('hidden');
-    updateAudioStatus('میکروفون فعال', 'badge-success');
-
-    if (!State.tunerLoopStarted) {
-        State.tunerLoopStarted = true;
-        startTunerLoop();
-    }
+    State.analyser = State.audioCtx.createAnalyser(); State.analyser.fftSize = 4096; State.analyser.smoothingTimeConstant = 0; State.micSource.connect(State.analyser);
+    document.getElementById('welcomeOverlay').classList.add('hidden'); updateAudioStatus('میکروفون فعال', 'badge-success');
+    if (!State.tunerLoopStarted) { State.tunerLoopStarted = true; startTunerLoop(); }
 }
 
-function updateAudioStatus(text, className) {
-    const el = document.getElementById('audioStatus');
-    el.innerText = text;
-    el.className = `badge ${className}`;
-}
+function updateAudioStatus(text, className) { const el = document.getElementById('audioStatus'); el.innerText = text; el.className = `badge ${className}`; }
 
 function detectPitch() {
     if (!State.analyser) return { freq: -1, confidence: 0, rms: 0 };
     const buffer = State.buffer;
-    
-    if (State.analyser.getFloatTimeDomainData) {
-        State.analyser.getFloatTimeDomainData(buffer);
-    } else {
-        const byteBuffer = new Uint8Array(buffer.length);
-        State.analyser.getByteTimeDomainData(byteBuffer);
-        for(let i=0; i<byteBuffer.length; i++) buffer[i] = (byteBuffer[i] - 128) / 128.0;
-    }
-    
-    let rms = 0;
-    for(let i=0; i<buffer.length; i++) rms += buffer[i]*buffer[i];
-    rms = Math.sqrt(rms/buffer.length);
-    
+    if (State.analyser.getFloatTimeDomainData) { State.analyser.getFloatTimeDomainData(buffer); } 
+    else { const byteBuffer = new Uint8Array(buffer.length); State.analyser.getByteTimeDomainData(byteBuffer); for(let i=0; i<byteBuffer.length; i++) buffer[i] = (byteBuffer[i] - 128) / 128.0; }
+    let rms = 0; for(let i=0; i<buffer.length; i++) rms += buffer[i]*buffer[i]; rms = Math.sqrt(rms/buffer.length);
     if (rms < State.noiseFloor) return { freq: -1, confidence: 0, rms };
-    
-    const sampleRate = State.audioCtx.sampleRate;
-    const yinBuffer = new Float32Array(buffer.length / 2);
-    
-    for (let tau = 1; tau < yinBuffer.length; tau++) {
-        let sum = 0;
-        for (let i = 0; i < yinBuffer.length; i++) {
-            const delta = buffer[i] - buffer[i + tau];
-            sum += delta * delta;
-        }
-        yinBuffer[tau] = sum;
-    }
-    
-    yinBuffer[0] = 1;
-    let runningSum = 0;
-    for (let tau = 1; tau < yinBuffer.length; tau++) {
-        runningSum += yinBuffer[tau];
-        yinBuffer[tau] = yinBuffer[tau] * tau / runningSum;
-    }
-    
-    const threshold = 1 - State.settings.confThreshold;
-    let tauEstimate = -1;
-    for (let tau = 2; tau < yinBuffer.length; tau++) {
-        if (yinBuffer[tau] < threshold) {
-            while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) tau++;
-            tauEstimate = tau;
-            break;
-        }
-    }
-    
+    const sampleRate = State.audioCtx.sampleRate; const yinBuffer = new Float32Array(buffer.length / 2);
+    for (let tau = 1; tau < yinBuffer.length; tau++) { let sum = 0; for (let i = 0; i < yinBuffer.length; i++) { const delta = buffer[i] - buffer[i + tau]; sum += delta * delta; } yinBuffer[tau] = sum; }
+    yinBuffer[0] = 1; let runningSum = 0;
+    for (let tau = 1; tau < yinBuffer.length; tau++) { runningSum += yinBuffer[tau]; yinBuffer[tau] = yinBuffer[tau] * tau / runningSum; }
+    const threshold = 1 - State.settings.confThreshold; let tauEstimate = -1;
+    for (let tau = 2; tau < yinBuffer.length; tau++) { if (yinBuffer[tau] < threshold) { while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) tau++; tauEstimate = tau; break; } }
     if (tauEstimate === -1) return { freq: -1, confidence: 0, rms };
-    
-    let betterTau;
-    let x0 = tauEstimate > 0 ? tauEstimate - 1 : tauEstimate;
-    let x2 = tauEstimate + 1 < yinBuffer.length ? tauEstimate + 1 : tauEstimate;
-    
-    if (x0 === tauEstimate) {
-        betterTau = yinBuffer[tauEstimate] <= yinBuffer[x2] ? tauEstimate : x2;
-    } else if (x2 === tauEstimate) {
-        betterTau = yinBuffer[tauEstimate] <= yinBuffer[x0] ? tauEstimate : x0;
-    } else {
-        let s0 = yinBuffer[x0], s1 = yinBuffer[tauEstimate], s2 = yinBuffer[x2];
-        let shift = (s2 - s0) / (2 * (2 * s1 - s2 - s0));
-        betterTau = tauEstimate + shift;
-    }
-    
-    const freq = sampleRate / betterTau;
-    const confidence = 1 - yinBuffer[tauEstimate];
-    
+    let betterTau; let x0 = tauEstimate > 0 ? tauEstimate - 1 : tauEstimate; let x2 = tauEstimate + 1 < yinBuffer.length ? tauEstimate + 1 : tauEstimate;
+    if (x0 === tauEstimate) { betterTau = yinBuffer[tauEstimate] <= yinBuffer[x2] ? tauEstimate : x2; } 
+    else if (x2 === tauEstimate) { betterTau = yinBuffer[tauEstimate] <= yinBuffer[x0] ? tauEstimate : x0; } 
+    else { let s0 = yinBuffer[x0], s1 = yinBuffer[tauEstimate], s2 = yinBuffer[x2]; let shift = (s2 - s0) / (2 * (2 * s1 - s2 - s0)); betterTau = tauEstimate + shift; }
+    const freq = sampleRate / betterTau; const confidence = 1 - yinBuffer[tauEstimate];
     if (freq < 60 || freq > 1000) return { freq: -1, confidence: 0, rms };
     return { freq, confidence, rms };
 }
@@ -671,83 +374,36 @@ function detectPitch() {
 function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / State.settings.A4)); }
 function midiToFreq(m) { return State.settings.A4 * Math.pow(2, (m - 69) / 12); }
 function getCents(f1, f2) { return 1200 * Math.log2(f1 / f2); }
-function midiToNoteName(m) {
-    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    return { persian: PERSIAN_NOTES[notes[m % 12]], octave: Math.floor(m / 12) - 1, en: notes[m % 12] };
-}
-function getIntervalName(semis) {
-    const abs = Math.abs(semis);
-    return INTERVALS.find(i => i.semitones === abs) ? INTERVALS.find(i => i.semitones === abs).name : `(${abs})`;
-}
+function midiToNoteName(m) { const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; return { persian: PERSIAN_NOTES[notes[m % 12]], octave: Math.floor(m / 12) - 1, en: notes[m % 12] }; }
+function getIntervalName(semis) { const abs = Math.abs(semis); return INTERVALS.find(i => i.semitones === abs) ? INTERVALS.find(i => i.semitones === abs).name : `(${abs})`; }
 
-// Synthesized Piano Sound
 function playPianoNote(midi, duration = 0.8, delay = 0) {
     return new Promise(resolve => {
-        const ctx = State.audioCtx;
-        const now = ctx.currentTime + delay;
-        const fundamental = midiToFreq(midi);
-        
-        const osc1 = ctx.createOscillator();
-        osc1.type = 'triangle';
-        osc1.frequency.value = fundamental;
-        
-        const osc2 = ctx.createOscillator();
-        osc2.type = 'sine';
-        osc2.frequency.value = fundamental * 2;
-        
-        const env1 = ctx.createGain();
-        const env2 = ctx.createGain();
-        
-        env1.gain.setValueAtTime(0, now);
-        env1.gain.linearRampToValueAtTime(0.6, now + 0.01); 
-        env1.gain.exponentialRampToValueAtTime(0.001, now + duration); 
-        
-        env2.gain.setValueAtTime(0, now);
-        env2.gain.linearRampToValueAtTime(0.2, now + 0.01);
-        env2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.5);
-        
-        osc1.connect(env1);
-        osc2.connect(env2);
-        env1.connect(State.refGainNode);
-        env2.connect(State.refGainNode);
-        
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + duration);
-        osc2.stop(now + duration);
-        
+        const ctx = State.audioCtx; const now = ctx.currentTime + delay; const fundamental = midiToFreq(midi);
+        const osc1 = ctx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = fundamental;
+        const osc2 = ctx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = fundamental * 2;
+        const env1 = ctx.createGain(); const env2 = ctx.createGain();
+        env1.gain.setValueAtTime(0, now); env1.gain.linearRampToValueAtTime(0.6, now + 0.01); env1.gain.exponentialRampToValueAtTime(0.001, now + duration); 
+        env2.gain.setValueAtTime(0, now); env2.gain.linearRampToValueAtTime(0.2, now + 0.01); env2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.5);
+        osc1.connect(env1); osc2.connect(env2); env1.connect(State.refGainNode); env2.connect(State.refGainNode);
+        osc1.start(now); osc2.start(now); osc1.stop(now + duration); osc2.stop(now + duration);
         setTimeout(resolve, duration * 1000 + delay * 1000);
     });
 }
 
 async function playSequence(notes) {
     State.isPlayingRef = true;
-    for(let i=0; i<notes.length; i++) {
-        await playPianoNote(notes[i], 0.8);
-        if(i < notes.length - 1) await new Promise(r => setTimeout(r, 200));
-    }
+    for(let i=0; i<notes.length; i++) { await playPianoNote(notes[i], 0.8); if(i < notes.length - 1) await new Promise(r => setTimeout(r, 200)); }
     State.isPlayingRef = false;
 }
 
-// Pure Sine wave for Dynamic steady note
 function playSineNote(midi, duration = 1.0, delay = 0) {
     return new Promise(resolve => {
-        const ctx = State.audioCtx;
-        const osc = ctx.createOscillator();
-        const env = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = midiToFreq(midi);
-        
+        const ctx = State.audioCtx; const osc = ctx.createOscillator(); const env = ctx.createGain();
+        osc.type = 'sine'; osc.frequency.value = midiToFreq(midi);
         const now = ctx.currentTime + delay;
-        env.gain.setValueAtTime(0, now);
-        env.gain.linearRampToValueAtTime(0.8, now + 0.05);
-        env.gain.linearRampToValueAtTime(0.8, now + duration - 0.1);
-        env.gain.linearRampToValueAtTime(0, now + duration);
-        
-        osc.connect(env);
-        env.connect(State.refGainNode);
-        osc.start(now);
-        osc.stop(now + duration);
+        env.gain.setValueAtTime(0, now); env.gain.linearRampToValueAtTime(0.8, now + 0.05); env.gain.linearRampToValueAtTime(0.8, now + duration - 0.1); env.gain.linearRampToValueAtTime(0, now + duration);
+        osc.connect(env); env.connect(State.refGainNode); osc.start(now); osc.stop(now + duration);
         setTimeout(resolve, duration * 1000 + delay * 1000);
     });
 }
@@ -756,18 +412,16 @@ let tunerCanvasCtx, tunerCanvas, pitchGraphData = new Array(200).fill(-1);
 function startTunerLoop() {
     tunerCanvas = document.getElementById('pitchGraph');
     const resize = () => { tunerCanvas.width = tunerCanvas.clientWidth; tunerCanvas.height = tunerCanvas.clientHeight; };
-    resize();
-    window.addEventListener('resize', resize);
-    tunerCanvasCtx = tunerCanvas.getContext('2d');
-    
+    resize(); window.addEventListener('resize', resize); tunerCanvasCtx = tunerCanvas.getContext('2d');
     function loop() {
         const { freq, confidence, rms } = detectPitch();
-        updateTunerUI(freq, confidence);
-        drawPitchGraph(freq, confidence);
-        
+        updateTunerUI(freq, confidence); drawPitchGraph(freq, confidence);
         if (State.exState === 'LISTENING') {
             if (State.currentExercise && State.currentExercise.type === 'dynamic') {
                 drawDynamicGraph(rms);
+            } else if (State.currentExercise && State.currentExercise.type === 'random') {
+                if (confidence > State.settings.confThreshold) State.detectedPitches.push({ freq, time: performance.now() });
+                drawRandomGraph();
             } else if (confidence > State.settings.confThreshold) {
                 State.detectedPitches.push({ freq, time: performance.now() });
                 drawExerciseGraph(freq);
@@ -779,35 +433,17 @@ function startTunerLoop() {
 }
 
 function updateTunerUI(freq, confidence) {
-    const noteEl = document.getElementById('tunerNote');
-    const confEl = document.getElementById('tunerConfidence');
+    const noteEl = document.getElementById('tunerNote'); const confEl = document.getElementById('tunerConfidence');
     confEl.innerText = `${Math.round(confidence * 100)}%`;
-    
     if (freq < 0 || confidence < State.settings.confThreshold) {
-        noteEl.innerText = '--';
-        document.getElementById('tunerOctave').innerText = 'صدای قابل اعتماد دریافت نشد';
-        document.getElementById('tunerFreq').innerText = '0.00';
-        document.getElementById('tunerCents').innerText = '0';
-        document.getElementById('tunerMeter').style.width = '0%';
-        document.getElementById('tunerStatus').innerText = 'سکوت / نویز';
-        return;
+        noteEl.innerText = '--'; document.getElementById('tunerOctave').innerText = 'صدای قابل اعتماد دریافت نشد'; document.getElementById('tunerFreq').innerText = '0.00';
+        document.getElementById('tunerCents').innerText = '0'; document.getElementById('tunerMeter').style.width = '0%'; document.getElementById('tunerStatus').innerText = 'سکوت / نویز'; return;
     }
-    
-    const midi = freqToMidi(freq);
-    const noteInfo = midiToNoteName(midi);
-    const targetFreq = midiToFreq(midi);
-    const cents = getCents(freq, targetFreq);
-    
-    noteEl.innerText = noteInfo.persian;
-    document.getElementById('tunerOctave').innerText = `اکتاو ${noteInfo.octave}`;
-    document.getElementById('tunerFreq').innerText = freq.toFixed(2);
+    const midi = freqToMidi(freq); const noteInfo = midiToNoteName(midi); const targetFreq = midiToFreq(midi); const cents = getCents(freq, targetFreq);
+    noteEl.innerText = noteInfo.persian; document.getElementById('tunerOctave').innerText = `اکتاو ${noteInfo.octave}`; document.getElementById('tunerFreq').innerText = freq.toFixed(2);
     document.getElementById('tunerCents').innerText = cents > 0 ? `+${cents.toFixed(0)}` : cents.toFixed(0);
-    
-    const meterWidth = Math.min(50, Math.abs(cents) / 50 * 50);
-    const meterEl = document.getElementById('tunerMeter');
-    meterEl.style.width = `${meterWidth}%`;
-    meterEl.style.left = cents < 0 ? `${50 - meterWidth}%` : `50%`;
-    
+    const meterWidth = Math.min(50, Math.abs(cents) / 50 * 50); const meterEl = document.getElementById('tunerMeter');
+    meterEl.style.width = `${meterWidth}%`; meterEl.style.left = cents < 0 ? `${50 - meterWidth}%` : `50%`;
     let statEl = document.getElementById('tunerStatus');
     if (Math.abs(cents) < 5) { statEl.innerText = 'دقیق'; statEl.style.color = 'var(--success)'; meterEl.style.background = 'var(--success)'; }
     else if (cents < 0) { statEl.innerText = 'کمی زیر نت'; statEl.style.color = 'var(--warning)'; meterEl.style.background = 'var(--warning)'; }
@@ -817,21 +453,15 @@ function updateTunerUI(freq, confidence) {
 function drawPitchGraph(freq, confidence) {
     if (!tunerCanvasCtx || tunerCanvas.width === 0) return;
     const ctx = tunerCanvasCtx, w = tunerCanvas.width, h = tunerCanvas.height;
-    pitchGraphData.push(freq > 0 && confidence > State.settings.confThreshold ? freq : -1);
-    pitchGraphData.shift();
-    
-    ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 1;
+    pitchGraphData.push(freq > 0 && confidence > State.settings.confThreshold ? freq : -1); pitchGraphData.shift();
+    ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 1;
     for(let i=0; i<5; i++) { ctx.beginPath(); ctx.moveTo(0, h * i / 4); ctx.lineTo(w, h * i / 4); ctx.stroke(); }
-    
-    ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 2; ctx.beginPath();
-    let started = false;
+    ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 2; ctx.beginPath(); let started = false;
     for(let i=0; i<pitchGraphData.length; i++) {
         if(pitchGraphData[i] > 0) {
             let y = h - ((Math.log2(pitchGraphData[i]) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
             y = Math.max(0, Math.min(h, y));
-            if(!started) { ctx.moveTo(i * (w / pitchGraphData.length), y); started = true; }
-            else ctx.lineTo(i * (w / pitchGraphData.length), y);
+            if(!started) { ctx.moveTo(i * (w / pitchGraphData.length), y); started = true; } else ctx.lineTo(i * (w / pitchGraphData.length), y);
         } else started = false;
     }
     ctx.stroke();
@@ -839,52 +469,43 @@ function drawPitchGraph(freq, confidence) {
 
 function analyzePitches(pitches, targetMidi) {
     if (pitches.length < 10) return { valid: false, reason: 'صدای قابل اعتماد دریافت نشد.' };
-    
-    const targetPitchClass = targetMidi % 12;
-    const validPitches = [];
-    let octaveShifted = false;
-    
+    const targetPitchClass = targetMidi % 12; const validPitches = []; let octaveShifted = false;
     for (let p of pitches) {
         const userMidi = freqToMidi(p.freq);
         if (userMidi % 12 === targetPitchClass) {
             if (userMidi !== targetMidi) octaveShifted = true;
-            const adjustedTargetFreq = midiToFreq(userMidi);
-            validPitches.push({ ...p, cents: getCents(p.freq, adjustedTargetFreq) });
+            const adjustedTargetFreq = midiToFreq(userMidi); validPitches.push({ ...p, cents: getCents(p.freq, adjustedTargetFreq) });
         }
     }
-    
     if (validPitches.length < 5) return { valid: false, reason: 'نت اشتباه خوانده شده است.' };
-    
-    const centsData = validPitches.map(p => p.cents);
-    const medCents = [...centsData].sort((a,b) => a-b)[Math.floor(centsData.length/2)];
+    const centsData = validPitches.map(p => p.cents); const medCents = [...centsData].sort((a,b) => a-b)[Math.floor(centsData.length/2)];
     const filteredCents = centsData.filter(c => Math.abs(c - medCents) < 100);
-    
     const meanCents = filteredCents.reduce((a,b) => a+b, 0) / filteredCents.length;
     const variance = filteredCents.reduce((a,b) => a + Math.pow(b - meanCents, 2), 0) / filteredCents.length;
     const stability = Math.max(0, 100 - Math.sqrt(variance) * 2);
-    
     const accuracyScore = Math.max(0, 100 - Math.abs(medCents) * 2);
     const finalScore = (accuracyScore * 0.6) + (stability * 0.4);
-    
     return { valid: true, meanCents, medCents, stability, score: Math.round(finalScore), octaveShifted };
 }
 
-function analyzeSequence(pitches, targetSeq) {
+// SMART SEQUENCE ANALYSIS
+function analyzeSequence(pitches, targetSeq, startTime) {
     const totalNotes = targetSeq.length;
-    if (pitches.length < totalNotes * 3) {
-        return { valid: false, reason: 'صدای کافی برای تحلیل کل توالی دریافت نشد. دوباره امتحان کنید.' };
-    }
+    if (pitches.length < totalNotes * 2) return { valid: false, reason: 'صدای کافی برای تحلیل دریافت نشد. دوباره امتحان کنید.' };
     
-    const chunkSize = Math.floor(pitches.length / totalNotes);
-    let correctNotes = 0;
-    let totalCentsError = 0;
-    let octaveShiftedCount = 0;
+    let correctNotes = 0; let totalCentsError = 0; let octaveShiftedCount = 0;
     
     for (let i = 0; i < totalNotes; i++) {
-        const chunk = pitches.slice(i * chunkSize, (i + 1) * chunkSize);
-        if (chunk.length === 0) continue;
+        // Expected time window for this note (1.0s per note based on playSequence timing)
+        const expectedStartT = startTime + i * 1000;
+        const expectedEndT = startTime + (i + 1) * 1000;
         
-        const freqs = chunk.map(p => p.freq).sort((a, b) => a - b);
+        // Get user pitches in this exact time window
+        const windowPitches = pitches.filter(p => p.time >= expectedStartT && p.time < expectedEndT);
+        
+        if (windowPitches.length < 2) continue; // Not enough data in this window
+        
+        const freqs = windowPitches.map(p => p.freq).sort((a, b) => a - b);
         const medianFreq = freqs[Math.floor(freqs.length / 2)];
         const userMidi = freqToMidi(medianFreq);
         const targetMidi = targetSeq[i];
@@ -896,13 +517,13 @@ function analyzeSequence(pitches, targetSeq) {
         }
     }
     
-    if (correctNotes === 0) return { valid: false, reason: 'هیچ یک از نت‌های توالی درست خوانده نشده است.' };
+    if (correctNotes === 0) return { valid: false, reason: 'هیچ یک از نت‌های توالی در زمان مناسب خوانده نشده است. سعی کنید هماهنگ با نمودار بخوانید.' };
     
     const accuracy = (correctNotes / totalNotes) * 100;
     const avgCents = totalCentsError / correctNotes;
     const score = Math.round(accuracy * 0.7 + Math.max(0, 100 - avgCents * 2) * 0.3);
     
-    let msg = `${correctNotes} از ${totalNotes} نت درست خوانده شده است.`;
+    let msg = `${correctNotes} از ${totalNotes} نت درست و در زمان مناسب خوانده شده است.`;
     if (octaveShiftedCount > 0) msg += `<br><span style='color:var(--warning);'>${octaveShiftedCount} نت در اکتاو متفاوت بوده است (بند قراردادی).</span>`;
     
     return { valid: true, score, msg, avgCents: Math.round(avgCents) };
@@ -911,31 +532,20 @@ function analyzeSequence(pitches, targetSeq) {
 // --- SINGLE NOTE ---
 async function startSingleNoteExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
-    document.getElementById('singleNoteResultCard').classList.add('hidden');
-    document.getElementById('singleNoteListeningCard').classList.add('hidden');
-    
+    document.getElementById('singleNoteResultCard').classList.add('hidden'); document.getElementById('singleNoteListeningCard').classList.add('hidden');
     const targetMidi = 41 + Math.floor(Math.random() * 25); 
-    State.currentExercise = { type: 'single_note', targetMidi };
-    State.targetMidi = targetMidi;
-    
+    State.currentExercise = { type: 'single_note', targetMidi }; State.targetMidi = targetMidi;
     await playPianoNote(targetMidi);
-    
-    State.exState = 'LISTENING';
-    State.detectedPitches = [];
+    State.exState = 'LISTENING'; State.detectedPitches = [];
     document.getElementById('singleNoteListeningCard').classList.remove('hidden');
     setTimeout(() => { if (State.exState === 'LISTENING') stopSingleNote(); }, 4000);
 }
-
 function stopSingleNote() {
-    if (State.exState !== 'LISTENING') return;
-    State.exState = 'ANALYZING';
+    if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
     document.getElementById('singleNoteListeningCard').classList.add('hidden');
-    
-    const a = analyzePitches(State.detectedPitches, State.targetMidi);
-    const content = document.getElementById('singleNoteResultContent');
-    if (!a.valid) {
-        content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`;
-    } else {
+    const a = analyzePitches(State.detectedPitches, State.targetMidi); const content = document.getElementById('singleNoteResultContent');
+    if (!a.valid) { content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`; } 
+    else {
         let msg = `امتیاز: ${a.score}%. پایداری: ${a.stability.toFixed(0)}%. `;
         if (a.octaveShifted) msg += "<br><span style='color:var(--warning);'>نت درست بوده اما در اکتاو متفاوتی خوانده شده (طبق بند قراردادی ایراد نگرفتیم).</span>";
         content.innerHTML = `<div class="status-box">${msg}</div>`;
@@ -947,47 +557,28 @@ function stopSingleNote() {
 // --- INTERVALS ---
 async function startIntervalExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
-    document.getElementById('intervalResultCard').classList.add('hidden');
-    document.getElementById('intervalListeningCard').classList.add('hidden');
-    document.getElementById('intervalTargetCard').classList.remove('hidden');
-    
+    document.getElementById('intervalResultCard').classList.add('hidden'); document.getElementById('intervalListeningCard').classList.add('hidden'); document.getElementById('intervalTargetCard').classList.remove('hidden');
     const startMidi = 41 + Math.floor(Math.random() * 13);
-    const possibleIntervals = [2, 3, 4, 5, 7, 9, 12];
-    const intervalSemis = possibleIntervals[Math.floor(Math.random() * possibleIntervals.length)];
+    const possibleIntervals = [2, 3, 4, 5, 7, 9, 12]; const intervalSemis = possibleIntervals[Math.floor(Math.random() * possibleIntervals.length)];
     let endMidi, direction;
-    
     if (Math.random() > 0.5 && startMidi - intervalSemis >= 41) { endMidi = startMidi - intervalSemis; direction = 'نزولی'; }
     else if (startMidi + intervalSemis <= 65) { endMidi = startMidi + intervalSemis; direction = 'صعودی'; }
     else { endMidi = startMidi - intervalSemis; direction = 'نزولی'; }
-    
-    State.currentExercise = { type: 'interval', startMidi, endMidi, interval: endMidi - startMidi, direction };
-    State.lastInterval = State.currentExercise;
-    
+    State.currentExercise = { type: 'interval', startMidi, endMidi, interval: endMidi - startMidi, direction }; State.lastInterval = State.currentExercise;
     document.getElementById('intStartNote').innerText = `${midiToNoteName(startMidi).persian} ${midiToNoteName(startMidi).octave}`;
     document.getElementById('intTargetNote').innerText = `${midiToNoteName(endMidi).persian} ${midiToNoteName(endMidi).octave}`;
-    document.getElementById('intType').innerText = getIntervalName(endMidi - startMidi);
-    document.getElementById('intDirection').innerText = direction;
-    
-    State.exState = 'PLAYING_REF';
-    await playSequence([startMidi, endMidi]);
-    
-    State.exState = 'LISTENING';
-    State.detectedPitches = [];
-    State.targetMidi = endMidi;
+    document.getElementById('intType').innerText = getIntervalName(endMidi - startMidi); document.getElementById('intDirection').innerText = direction;
+    State.exState = 'PLAYING_REF'; await playSequence([startMidi, endMidi]);
+    State.exState = 'LISTENING'; State.detectedPitches = []; State.targetMidi = endMidi;
     document.getElementById('intervalListeningCard').classList.remove('hidden');
     setTimeout(() => { if (State.exState === 'LISTENING') stopListening(); }, 6000);
 }
-
 function stopListening() {
-    if (State.exState !== 'LISTENING') return;
-    State.exState = 'ANALYZING';
+    if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
     document.getElementById('intervalListeningCard').classList.add('hidden');
-    
-    const a = analyzePitches(State.detectedPitches, State.targetMidi);
-    const content = document.getElementById('intervalResultContent');
-    if (!a.valid) {
-        content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`;
-    } else {
+    const a = analyzePitches(State.detectedPitches, State.targetMidi); const content = document.getElementById('intervalResultContent');
+    if (!a.valid) { content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`; } 
+    else {
         content.innerHTML = `<div class="stat-grid"><div class="stat-item"><div class="stat-label">امتیاز</div><div class="stat-value">${a.score}%</div></div><div class="stat-item"><div class="stat-label">پایداری</div><div class="stat-value">${a.stability.toFixed(0)}%</div></div></div>`;
         if (a.octaveShifted) content.innerHTML += `<div class="analysis-text" style="margin-top:15px; border-color:var(--warning);">نت درست بوده اما در اکتاو متفاوتی خوانده شده (بند قراردادی).</div>`;
         saveAttempt({ timestamp: Date.now(), type: 'interval', targetMidi: State.currentExercise.endMidi, interval: State.currentExercise.interval, direction: State.currentExercise.direction, score: a.score, centsError: a.medCents, valid: true });
@@ -998,52 +589,39 @@ function stopListening() {
 // --- RANDOM NOTES ---
 async function startRandomExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
-    document.getElementById('randomResultCard').classList.add('hidden');
-    document.getElementById('randomListeningCard').classList.add('hidden');
-    document.getElementById('randomSequenceCard').classList.remove('hidden');
+    document.getElementById('randomResultCard').classList.add('hidden'); document.getElementById('randomListeningCard').classList.add('hidden'); document.getElementById('randomSequenceCard').classList.remove('hidden');
+    const scale = document.getElementById('scaleSelect').value; const count = parseInt(document.getElementById('noteCountSelect').value); const scaleNotes = SCALES[scale];
+    let seq = []; for(let i=0; i<count; i++) seq.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+    State.currentExercise = { type: 'random', sequence: seq }; State.lastRandomSeq = seq;
     
-    const scale = document.getElementById('scaleSelect').value;
-    const count = parseInt(document.getElementById('noteCountSelect').value);
-    const scaleNotes = SCALES[scale];
+    // Generate Timing Curve for Graph (1.0s per note)
+    State.targetRandomCurve = seq.map((midi, i) => ({ startT: i * 1.0, endT: (i + 1) * 1.0, midi: midi }));
+    State.randomTotalDuration = seq.length * 1.0;
     
-    let seq = [];
-    for(let i=0; i<count; i++) seq.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
-    
-    State.currentExercise = { type: 'random', sequence: seq };
-    State.lastRandomSeq = seq;
-    
-    const disp = document.getElementById('randomNotesDisplay');
-    disp.innerHTML = '';
+    const disp = document.getElementById('randomNotesDisplay'); disp.innerHTML = '';
     seq.forEach(m => {
-        const n = midiToNoteName(m);
-        const div = document.createElement('div');
+        const n = midiToNoteName(m); const div = document.createElement('div');
         div.style.cssText = 'background:var(--bg-color); padding:10px 15px; border-radius:8px; text-align:center; min-width:60px;';
         div.innerHTML = `<div style="font-weight:bold;">${n.persian}</div><div style="font-size:0.8rem; color:var(--text-muted);">${n.octave}</div>`;
         disp.appendChild(div);
     });
     
-    State.exState = 'PLAYING_REF';
-    await playSequence(seq);
+    State.exState = 'PLAYING_REF'; await playSequence(seq);
     
-    State.exState = 'LISTENING';
-    State.detectedPitches = [];
-    State.targetMidi = seq[seq.length-1];
+    State.exState = 'LISTENING'; State.detectedPitches = []; State.randomStartTime = performance.now();
     document.getElementById('randomListeningCard').classList.remove('hidden');
     
-    let listenTime = count * 1500 + 1000;
+    let listenTime = count * 1000 + 1000; // Give them exactly the time of the sequence + 1s buffer
     setTimeout(() => { if (State.exState === 'LISTENING') stopRandomListening(); }, listenTime);
 }
-
 function stopRandomListening() {
-    if (State.exState !== 'LISTENING') return;
-    State.exState = 'ANALYZING';
+    if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
     document.getElementById('randomListeningCard').classList.add('hidden');
     
-    const a = analyzeSequence(State.detectedPitches, State.currentExercise.sequence);
+    const a = analyzeSequence(State.detectedPitches, State.currentExercise.sequence, State.randomStartTime);
     const content = document.getElementById('randomResultContent');
-    if (!a.valid) {
-        content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`;
-    } else {
+    if (!a.valid) { content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`; } 
+    else {
         content.innerHTML = `
             <div class="stat-grid">
                 <div class="stat-item"><div class="stat-label">امتیاز توالی</div><div class="stat-value">${a.score}%</div></div>
@@ -1056,65 +634,79 @@ function stopRandomListening() {
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
 
+// KARAOKE-STYLE GRAPH FOR RANDOM NOTES
+function drawRandomGraph() {
+    const c = document.getElementById('randomGraph');
+    if (!c) return;
+    if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
+    const ctx = c.getContext('2d'); const w = c.width, h = c.height;
+    if (w === 0) return;
+    
+    ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
+    
+    const duration = State.randomTotalDuration;
+    const elapsed = (performance.now() - State.randomStartTime) / 1000;
+
+    // Draw target curve (Red Step Graph)
+    ctx.strokeStyle = 'rgba(255,0,85,0.8)'; ctx.lineWidth = 4; ctx.beginPath();
+    State.targetRandomCurve.forEach((p, i) => {
+        let x1 = (p.startT / duration) * w; let x2 = (p.endT / duration) * w;
+        let y = h - ((Math.log2(midiToFreq(p.midi)) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
+        y = Math.max(0, Math.min(h, y));
+        if (i === 0) ctx.moveTo(x1, y);
+        else ctx.lineTo(x1, y); // step up/down
+        ctx.lineTo(x2, y);
+    });
+    ctx.stroke();
+    
+    // Draw user curve (Green)
+    ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.beginPath(); let started = false;
+    State.detectedPitches.forEach((p, i) => {
+        let t = (p.time - State.randomStartTime) / 1000;
+        if (t < 0 || t > duration) return;
+        let x = (t / duration) * w;
+        let y = h - ((Math.log2(p.freq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
+        y = Math.max(0, Math.min(h, y));
+        if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw playhead (White vertical line)
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2; ctx.beginPath();
+    let playheadX = (elapsed / duration) * w; if (playheadX > w) playheadX = w;
+    ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, h); ctx.stroke();
+}
+
 // --- DYNAMIC ---
 async function startDynamicExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
-    document.getElementById('dynamicResultCard').classList.add('hidden');
-    document.getElementById('dynamicTargetCard').classList.remove('hidden');
-    document.getElementById('dynamicListeningCard').classList.remove('hidden');
-    
+    document.getElementById('dynamicResultCard').classList.add('hidden'); document.getElementById('dynamicTargetCard').classList.remove('hidden'); document.getElementById('dynamicListeningCard').classList.remove('hidden');
     const targetMidi = 41 + Math.floor(Math.random() * 25);
-    State.currentExercise = { type: 'dynamic', targetMidi };
-    State.targetMidi = targetMidi;
+    State.currentExercise = { type: 'dynamic', targetMidi }; State.targetMidi = targetMidi;
     document.getElementById('dynTargetNote').innerText = `${midiToNoteName(targetMidi).persian} ${midiToNoteName(targetMidi).octave}`;
-    
-    const duration = 4.0; // 4 seconds
-    const points = 40;
-    const curve = [];
+    const duration = 4.0; const points = 40; const curve = [];
     for(let i=0; i<=points; i++) {
         const t = i / points * duration;
-        // Random smooth sine curve between 0.1 and 0.9
         const vol = 0.5 + 0.4 * Math.sin(t * Math.PI * (0.5 + Math.random() * 1.5) + Math.random() * Math.PI);
         curve.push({ t, vol: Math.max(0.1, Math.min(0.9, vol)) });
     }
-    State.targetDynamicCurve = curve;
-    State.dynamicDuration = duration;
-    
-    State.exState = 'LISTENING';
-    State.detectedVolumes = [];
-    State.dynamicStartTime = performance.now();
-    
-    // Play a steady reference note while user follows the graph
+    State.targetDynamicCurve = curve; State.dynamicDuration = duration;
+    State.exState = 'LISTENING'; State.detectedVolumes = []; State.dynamicStartTime = performance.now();
     playSineNote(targetMidi, duration, 0);
-    
     setTimeout(() => { if (State.exState === 'LISTENING') stopDynamic(); }, duration * 1000 + 200);
 }
-
 function stopDynamic() {
-    if (State.exState !== 'LISTENING') return;
-    State.exState = 'ANALYZING';
-    
+    if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
     if (State.detectedVolumes.length < 10) {
         document.getElementById('dynamicResultContent').innerHTML = `<div class="status-box" style="color:var(--accent-2);">صدای کافی دریافت نشد.</div>`;
-        document.getElementById('dynamicResultCard').classList.remove('hidden');
-        return;
+        document.getElementById('dynamicResultCard').classList.remove('hidden'); return;
     }
-    
-    let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
-    let totalError = 0;
-
+    let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01); let totalError = 0;
     State.detectedVolumes.forEach(uv => {
-        // Find closest target point in time
-        let closestTarget = State.targetDynamicCurve.reduce((prev, curr) => {
-            return (Math.abs(curr.t - uv.t) < Math.abs(prev.t - uv.t) ? curr : prev);
-        });
-        let userVolNormalized = uv.rms / maxUserRms;
-        totalError += Math.abs(closestTarget.vol - userVolNormalized);
+        let closestTarget = State.targetDynamicCurve.reduce((prev, curr) => (Math.abs(curr.t - uv.t) < Math.abs(prev.t - uv.t) ? curr : prev));
+        let userVolNormalized = uv.rms / maxUserRms; totalError += Math.abs(closestTarget.vol - userVolNormalized);
     });
-
-    let avgError = totalError / State.detectedVolumes.length;
-    let score = Math.round(Math.max(0, 100 - avgError * 150));
-    
+    let avgError = totalError / State.detectedVolumes.length; let score = Math.round(Math.max(0, 100 - avgError * 150));
     document.getElementById('dynamicResultContent').innerHTML = `
         <div class="stat-grid">
             <div class="stat-item"><div class="stat-label">امتیاز داینامیک</div><div class="stat-value">${score}%</div></div>
@@ -1125,77 +717,51 @@ function stopDynamic() {
     saveAttempt({ timestamp: Date.now(), type: 'dynamic', score: score, valid: true });
     document.getElementById('dynamicResultCard').classList.remove('hidden');
 }
-
 function drawDynamicGraph(rms) {
-    const c = document.getElementById('dynamicGraph');
-    if (!c) return;
+    const c = document.getElementById('dynamicGraph'); if (!c) return;
     if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
-    const ctx = c.getContext('2d');
-    const w = c.width, h = c.height;
+    const ctx = c.getContext('2d'); const w = c.width, h = c.height;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
-    
-    // Draw target curve (Red)
-    ctx.strokeStyle = 'rgba(255,0,85,0.8)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,0,85,0.8)'; ctx.lineWidth = 4; ctx.beginPath();
     State.targetDynamicCurve.forEach((p, i) => {
-        let x = (p.t / State.dynamicDuration) * w;
-        let y = h - (p.vol * h * 0.9); // 10% margin
+        let x = (p.t / State.dynamicDuration) * w; let y = h - (p.vol * h * 0.9);
         if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
-    
-    // Record user volume with timestamp relative to start
     let t = (performance.now() - State.dynamicStartTime) / 1000;
-    if (rms > State.noiseFloor && t <= State.dynamicDuration) {
-        State.detectedVolumes.push({ rms, t });
-    }
-
-    // Draw user curve (Green)
+    if (rms > State.noiseFloor && t <= State.dynamicDuration) State.detectedVolumes.push({ rms, t });
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
-    ctx.strokeStyle = '#00ff88';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
+    ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.beginPath();
     State.detectedVolumes.forEach((p, i) => {
-        let x = (p.t / State.dynamicDuration) * w;
-        let y = h - (p.rms / maxUserRms) * h * 0.9;
+        let x = (p.t / State.dynamicDuration) * w; let y = h - (p.rms / maxUserRms) * h * 0.9;
         if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
 }
 
 function drawExerciseGraph(freq) {
-    const c = document.getElementById('intervalGraph') || document.getElementById('randomGraph') || document.getElementById('singleNoteGraph');
+    const c = document.getElementById('intervalGraph') || document.getElementById('singleNoteGraph');
     if (!c) return;
     if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
-    const ctx = c.getContext('2d');
-    const w = c.width, h = c.height;
-    if (w === 0) return;
-    
+    const ctx = c.getContext('2d'); const w = c.width, h = c.height; if (w === 0) return;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
-    
     const targetFreq = midiToFreq(State.targetMidi);
     let targetY = h - ((Math.log2(targetFreq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
     targetY = Math.max(0, Math.min(h, targetY));
-    
     ctx.strokeStyle = 'rgba(255,0,85,0.5)'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
     ctx.beginPath(); ctx.moveTo(0, targetY); ctx.lineTo(w, targetY); ctx.stroke(); ctx.setLineDash([]);
-    
-    const len = State.detectedPitches.length;
-    const xStep = w / 100;
+    const len = State.detectedPitches.length; const xStep = w / 100;
     ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.beginPath();
     const startIdx = Math.max(0, len - 100);
     for (let i = startIdx; i < len; i++) {
         const p = State.detectedPitches[i];
         let y = h - ((Math.log2(p.freq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
-        y = Math.max(0, Math.min(h, y));
-        let x = (i - startIdx) * xStep;
+        y = Math.max(0, Math.min(h, y)); let x = (i - startIdx) * xStep;
         if (i === startIdx) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.stroke();
 }
 
-// IndexedDB Setup
 let db;
 function initDB() {
     return new Promise((resolve) => {
@@ -1210,51 +776,34 @@ function initDB() {
         req.onerror = () => resolve();
     });
 }
-
 function saveAttempt(data) {
     State.sessionAttempts.push(data);
     if (!db) return;
-    const tx = db.transaction('attempts', 'readwrite');
-    tx.objectStore('attempts').add(data);
+    const tx = db.transaction('attempts', 'readwrite'); tx.objectStore('attempts').add(data);
 }
-
 async function exportData() {
     if (!db) return alert("دیتابیس در دسترس نیست.");
     const tx = db.transaction(['sessions', 'attempts'], 'readonly');
     const sessions = await new Promise(res => { const r = tx.objectStore('sessions').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
     const attempts = await new Promise(res => { const r = tx.objectStore('attempts').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
-    
     const dataStr = JSON.stringify({ sessions, attempts }, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `vocal_trainer_export_${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = `vocal_trainer_export_${Date.now()}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
-
 function endSession() {
     if (State.sessionAttempts.length === 0) {
         document.getElementById('sessionReportContent').innerHTML = '<div class="status-box">هیچ تمرینی انجام نشده است.</div>';
-        document.getElementById('sessionReportCard').classList.remove('hidden');
-        return;
+        document.getElementById('sessionReportCard').classList.remove('hidden'); return;
     }
     const valid = State.sessionAttempts.filter(a => a.valid);
     const overall = valid.reduce((a,b) => a + b.score, 0) / valid.length;
     document.getElementById('sessionReportContent').innerHTML = `<div class="stat-grid"><div class="stat-item"><div class="stat-label">امتیاز کلی</div><div class="stat-value">${overall.toFixed(0)}%</div></div><div class="stat-item"><div class="stat-label">تعداد تمرین</div><div class="stat-value">${valid.length}</div></div></div>`;
     document.getElementById('sessionReportCard').classList.remove('hidden');
-    
-    if (db) {
-        const tx = db.transaction('sessions', 'readwrite');
-        tx.objectStore('sessions').add({ date: new Date().toLocaleDateString('fa-IR'), timestamp: Date.now(), score: overall, count: valid.length });
-    }
-    State.sessionAttempts = [];
-    loadHistory();
+    if (db) { const tx = db.transaction('sessions', 'readwrite'); tx.objectStore('sessions').add({ date: new Date().toLocaleDateString('fa-IR'), timestamp: Date.now(), score: overall, count: valid.length }); }
+    State.sessionAttempts = []; loadHistory();
 }
-
 async function loadHistory() {
     if (!db) return;
     const tx = db.transaction(['sessions', 'attempts'], 'readonly');
@@ -1262,56 +811,34 @@ async function loadHistory() {
     const attempts = await new Promise(res => { const r = tx.objectStore('attempts').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
     renderAnalytics(attempts);
 }
-
 function renderAnalytics(attempts) {
-    const c = document.getElementById('chartProgress');
-    c.width = c.clientWidth; c.height = c.clientHeight;
-    const ctx = c.getContext('2d');
-    ctx.fillStyle = '#0f1115'; ctx.fillRect(0,0,c.width,c.height);
-    
+    const c = document.getElementById('chartProgress'); c.width = c.clientWidth; c.height = c.clientHeight;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#0f1115'; ctx.fillRect(0,0,c.width,c.height);
     if (attempts.length < 2) {
         ctx.fillStyle = '#8b9bb4'; ctx.textAlign = 'center'; ctx.font = '12px sans-serif';
         ctx.fillText('به تمرین بیشتری نیاز است', c.width/2, c.height/2);
-        document.getElementById('weaknessAnalysis').innerText = 'نیاز به تمرین بیشتری است.';
-        return;
+        document.getElementById('weaknessAnalysis').innerText = 'نیاز به تمرین بیشتری است.'; return;
     }
-    
     ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = 2; ctx.beginPath();
     const stepX = c.width / (attempts.length - 1);
-    attempts.forEach((a, i) => {
-        let x = i * stepX; let y = c.height - (a.score / 100 * c.height);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
+    attempts.forEach((a, i) => { let x = i * stepX; let y = c.height - (a.score / 100 * c.height); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
     ctx.stroke();
-    
-    // Interval Stats
     const intervals = {};
     attempts.filter(a => a.type === 'interval').forEach(a => {
         const key = `${a.interval}_${a.direction}`;
         if (!intervals[key]) intervals[key] = { count: 0, totalScore: 0, totalCents: 0 };
         intervals[key].count++; intervals[key].totalScore += a.score; intervals[key].totalCents += a.centsError;
     });
-    
-    let weakText = 'برای تحلیل دقیق‌تر به تمرین بیشتری نیاز است.';
-    let tableHTML = '';
-    let weakest = null, weakestScore = 100;
-    
+    let weakText = 'برای تحلیل دقیق‌تر به تمرین بیشتری نیاز است.'; let tableHTML = ''; let weakest = null, weakestScore = 100;
     Object.keys(intervals).forEach(k => {
-        const data = intervals[k];
-        const avgScore = data.totalScore / data.count;
-        const avgCents = data.totalCents / data.count;
+        const data = intervals[k]; const avgScore = data.totalScore / data.count; const avgCents = data.totalCents / data.count;
         const [semis, dir] = k.split('_');
         tableHTML += `<tr><td>${getIntervalName(parseInt(semis))}</td><td>${dir}</td><td>${data.count}</td><td>${avgScore.toFixed(0)}%</td><td>${avgCents > 0 ? '+' : ''}${avgCents.toFixed(0)}</td></tr>`;
         if (avgScore < weakestScore) { weakestScore = avgScore; weakest = { name: getIntervalName(parseInt(semis)), dir, avgCents }; }
     });
-    
     if (weakest) weakText = `بیشترین مشکل در فاصله ${weakest.name} ${weakest.dir}. معمولاً نت را ${weakest.avgCents > 0 ? 'بالاتر (Sharp)' : 'پایین‌تر (Flat)'} می‌خوانید.`;
-    document.getElementById('weaknessAnalysis').innerText = weakText;
-    document.getElementById('intervalStatsBody').innerHTML = tableHTML;
-    
-    // Pitch Stats (Single & Random)
-    const singleNotes = attempts.filter(a => a.type === 'single_note');
-    const randomNotes = attempts.filter(a => a.type === 'random');
+    document.getElementById('weaknessAnalysis').innerText = weakText; document.getElementById('intervalStatsBody').innerHTML = tableHTML;
+    const singleNotes = attempts.filter(a => a.type === 'single_note'); const randomNotes = attempts.filter(a => a.type === 'random');
     const avg = (arr) => arr.length > 0 ? (arr.reduce((a,b) => a + b.score, 0) / arr.length).toFixed(0) + '%' : 'بدون داده';
     document.getElementById('pitchStats').innerHTML = `
         <div class="stat-item"><div class="stat-label">تک‌نت (تعداد)</div><div class="stat-value">${singleNotes.length}</div></div>
@@ -1319,8 +846,6 @@ function renderAnalytics(attempts) {
         <div class="stat-item"><div class="stat-label">رندوم نت (تعداد)</div><div class="stat-value">${randomNotes.length}</div></div>
         <div class="stat-item"><div class="stat-label">میانگین رندوم نت</div><div class="stat-value">${avg(randomNotes)}</div></div>
     `;
-
-    // Dynamic Stats
     const dynamics = attempts.filter(a => a.type === 'dynamic');
     document.getElementById('dynamicStats').innerHTML = `
         <div class="stat-item"><div class="stat-label">تعداد تمرین داینامیک</div><div class="stat-value">${dynamics.length}</div></div>
@@ -1336,21 +861,17 @@ function navigateTo(viewId, title) {
     document.getElementById('pageTitle').innerText = title;
     if (viewId === 'analytics') loadHistory();
 }
-
 function setRefVolume(v) { State.settings.refVolume = parseFloat(v); if (State.refGainNode) State.refGainNode.gain.value = State.settings.refVolume; }
 function setA4(v) { State.settings.A4 = parseInt(v); }
 function setConfThreshold(v) { State.settings.confThreshold = parseFloat(v); }
-
 async function calibrateMic() {
     const statusEl = document.getElementById('calibStatus');
     statusEl.innerText = 'در حال کالیبراسیون...'; statusEl.style.color = 'var(--warning)';
     let maxRms = 0; const start = Date.now();
     const interval = setInterval(() => {
-        const { rms } = detectPitch();
-        if (rms > maxRms) maxRms = rms;
+        const { rms } = detectPitch(); if (rms > maxRms) maxRms = rms;
         if (Date.now() - start > 2000) {
-            clearInterval(interval);
-            State.noiseFloor = maxRms * 1.5;
+            clearInterval(interval); State.noiseFloor = maxRms * 1.5;
             statusEl.innerText = `کالیبراسیون انجام شد. نویز: ${State.noiseFloor.toFixed(3)}`; statusEl.style.color = 'var(--success)';
         }
     }, 50);
@@ -1393,16 +914,8 @@ function attachEventListeners() {
     document.getElementById('btnExportData').addEventListener('click', exportData);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    attachEventListeners();
-    initDB().then(() => { loadHistory(); });
-});
-
-document.addEventListener('visibilitychange', async () => {
-    if (!State.audioCtx) return;
-    if (document.hidden) await State.audioCtx.suspend();
-    else await State.audioCtx.resume();
-});
+window.addEventListener('DOMContentLoaded', () => { attachEventListeners(); initDB().then(() => { loadHistory(); }); });
+document.addEventListener('visibilitychange', async () => { if (!State.audioCtx) return; if (document.hidden) await State.audioCtx.suspend(); else await State.audioCtx.resume(); });
 </script>
 </body>
 </html>
