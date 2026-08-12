@@ -8,28 +8,12 @@
     <title>مربی آواز حرفه‌ای</title>
     <style>
         :root {
-            --bg-color: #0f1115;
-            --card-bg: #1a1d24;
-            --accent: #00d4ff;
-            --accent-2: #ff0055;
-            --success: #00ff88;
-            --warning: #ffaa00;
-            --text-main: #ffffff;
-            --text-muted: #8b9bb4;
-            --border: #2a2f3a;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --bg-color: #0f1115; --card-bg: #1a1d24; --accent: #00d4ff; --accent-2: #ff0055;
+            --success: #00ff88; --warning: #ffaa00; --text-main: #ffffff; --text-muted: #8b9bb4;
+            --border: #2a2f3a; --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-            background-color: var(--bg-color); color: var(--text-main);
-            overflow: hidden; height: 100vh; height: 100dvh;
-            user-select: none; -webkit-user-select: none;
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif; background-color: var(--bg-color); color: var(--text-main); overflow: hidden; height: 100vh; height: 100dvh; user-select: none; -webkit-user-select: none; }
         #app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
         .header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); flex-shrink: 0; }
         .header h1 { font-size: 1.2rem; font-weight: 700; background: linear-gradient(45deg, var(--accent), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -38,9 +22,9 @@
         .view.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .card { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .nav-bottom { display: flex; justify-content: space-around; background: var(--card-bg); border-top: 1px solid var(--border); padding: 10px 0; flex-shrink: 0; }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: color 0.2s; font-family: inherit; min-width: 50px; }
-        .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-bottom { display: flex; justify-content: space-around; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 0; flex-shrink: 0; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 0.65rem; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: color 0.2s; font-family: inherit; min-width: 45px; }
+        .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
         .nav-btn.active { color: var(--accent); }
         .btn { background: linear-gradient(45deg, var(--accent), #0099ff); color: #000; border: none; padding: 16px; border-radius: 12px; font-size: 1.1rem; font-weight: 700; cursor: pointer; width: 100%; transition: transform 0.1s, opacity 0.2s; font-family: inherit; }
         .btn:active { transform: scale(0.98); }
@@ -94,24 +78,13 @@
     </header>
 
     <div class="views-container">
-        
         <!-- Tuner View -->
         <div id="view-tuner" class="view active">
             <div class="card">
                 <div class="value-big" id="tunerNote">--</div>
                 <div style="text-align:center; color:var(--text-muted); margin-top:5px;" id="tunerOctave">--</div>
-                <div style="margin-top:20px;">
-                    <span class="label">فرکانس (Hz)</span>
-                    <div id="tunerFreq" style="font-size:1.2rem; text-align:center;">0.00</div>
-                </div>
-                <div style="margin-top:20px;">
-                    <span class="label">اختلاف (Cents)</span>
-                    <div class="meter-container">
-                        <div class="meter-center"></div>
-                        <div class="meter-bar" id="tunerMeter"></div>
-                    </div>
-                    <div style="text-align:center; font-weight:bold;" id="tunerCents">0</div>
-                </div>
+                <div style="margin-top:20px;"><span class="label">فرکانس (Hz)</span><div id="tunerFreq" style="font-size:1.2rem; text-align:center;">0.00</div></div>
+                <div style="margin-top:20px;"><span class="label">اختلاف (Cents)</span><div class="meter-container"><div class="meter-center"></div><div class="meter-bar" id="tunerMeter"></div></div><div style="text-align:center; font-weight:bold;" id="tunerCents">0</div></div>
                 <div class="stat-grid" style="margin-top:20px;">
                     <div class="stat-item"><div class="stat-label">اطمینان (Confidence)</div><div class="stat-value" id="tunerConfidence">0%</div></div>
                     <div class="stat-item"><div class="stat-label">وضعیت</div><div class="stat-value" id="tunerStatus" style="font-size:0.9rem;">--</div></div>
@@ -124,13 +97,11 @@
                 <button class="btn" style="margin-top:15px;" id="btnStartSingleNote">شروع تمرین تک‌نت</button>
             </div>
             <div class="card hidden" id="singleNoteListeningCard">
-                <div class="status-box pulse">بخوانید...</div>
-                <canvas id="singleNoteGraph" style="margin-top:15px;"></canvas>
+                <div class="status-box pulse">بخوانید...</div><canvas id="singleNoteGraph" style="margin-top:15px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopSingleNote">پایان و تحلیل</button>
             </div>
             <div class="card hidden" id="singleNoteResultCard">
-                <h3>نتیجه تحلیل تک‌نت</h3>
-                <div id="singleNoteResultContent"></div>
+                <h3>نتیجه تحلیل تک‌نت</h3><div id="singleNoteResultContent"></div>
                 <button class="btn" style="margin-top:15px;" id="btnNextSingleNote">نت بعدی</button>
             </div>
         </div>
@@ -154,13 +125,11 @@
                 </div>
             </div>
             <div class="card hidden" id="intervalListeningCard">
-                <div class="status-box pulse">در حال گوش دادن... بخوانید!</div>
-                <canvas id="intervalGraph" style="margin-top:15px;"></canvas>
+                <div class="status-box pulse">در حال گوش دادن... بخوانید!</div><canvas id="intervalGraph" style="margin-top:15px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopListening">پایان و تحلیل</button>
             </div>
             <div class="card hidden" id="intervalResultCard">
-                <h3>نتیجه تحلیل</h3>
-                <div id="intervalResultContent"></div>
+                <h3>نتیجه تحلیل</h3><div id="intervalResultContent"></div>
                 <button class="btn" style="margin-top:15px;" id="btnNextInterval">فاصله بعدی</button>
             </div>
         </div>
@@ -170,46 +139,43 @@
             <div class="card">
                 <h3>تمرین رندوم نت</h3>
                 <div class="col" style="margin-top:15px;">
-                    <div>
-                        <span class="label">گام (Scale)</span>
-                        <select id="scaleSelect">
-                            <option value="C Major">ماژور دو</option>
-                            <option value="G Major">ماژور سل</option>
-                            <option value="A Minor Natural">مینور لا (طبیعی)</option>
-                            <option value="A Minor Harmonic">مینور لا (هارمونیک)</option>
-                            <option value="A Minor Melodic">مینور لا (ملودیک)</option>
-                            <option value="E Minor">مینور می</option>
-                            <option value="D Minor">مینور ر</option>
-                            <option value="Chromatic">کروماتیک</option>
-                        </select>
-                    </div>
-                    <div>
-                        <span class="label">تعداد نت‌ها</span>
-                        <select id="noteCountSelect">
-                            <option value="2">۲ نت</option>
-                            <option value="4" selected>۴ نت</option>
-                            <option value="8">۸ نت</option>
-                            <option value="16">۱۶ نت</option>
-                            <option value="32">۳۲ نت</option>
-                        </select>
-                    </div>
+                    <div><span class="label">گام (Scale)</span><select id="scaleSelect">
+                        <option value="C Major">ماژور دو</option><option value="G Major">ماژور سل</option>
+                        <option value="A Minor Natural">مینور لا (طبیعی)</option><option value="A Minor Harmonic">مینور لا (هارمونیک)</option>
+                        <option value="A Minor Melodic">مینور لا (ملودیک)</option><option value="E Minor">مینور می</option>
+                        <option value="D Minor">مینور ر</option><option value="Chromatic">کروماتیک</option>
+                    </select></div>
+                    <div><span class="label">تعداد نت‌ها</span><select id="noteCountSelect">
+                        <option value="2">۲ نت</option><option value="4" selected>۴ نت</option>
+                        <option value="8">۸ نت</option><option value="16">۱۶ نت</option><option value="32">۳۲ نت</option>
+                    </select></div>
                 </div>
                 <button class="btn" style="margin-top:15px;" id="btnStartRandom">تولید و پخش نت‌ها</button>
                 <div class="row" style="margin-top:15px;"><button class="btn btn-secondary" style="flex:1;" id="btnPlayLastRandom">پخش مجدد مرجع</button></div>
             </div>
-            <div class="card hidden" id="randomSequenceCard">
-                <span class="label">توالی نت‌ها</span>
-                <div id="randomNotesDisplay" style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;"></div>
-            </div>
+            <div class="card hidden" id="randomSequenceCard"><span class="label">توالی نت‌ها</span><div id="randomNotesDisplay" style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;"></div></div>
             <div class="card hidden" id="randomListeningCard">
                 <div class="status-box pulse">صدای خود را با خط سبز روی خط قرمز نگه دارید...</div>
                 <canvas id="randomGraph" style="margin-top:15px; height: 200px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopRandomListening">پایان و تحلیل</button>
             </div>
-            <div class="card hidden" id="randomResultCard">
-                <h3>نتیجه تحلیل</h3>
-                <div id="randomResultContent"></div>
-                <button class="btn" style="margin-top:15px;" id="btnNextRandom">توالی بعدی</button>
+            <div class="card hidden" id="randomResultCard"><h3>نتیجه تحلیل</h3><div id="randomResultContent"></div><button class="btn" style="margin-top:15px;" id="btnNextRandom">توالی بعدی</button></div>
+        </div>
+
+        <!-- Game View (Note Chasing) -->
+        <div id="view-game" class="view">
+            <div class="card">
+                <h3>بازی نت‌خوانی (C Major)</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">هیچ صدایی پخش نمی‌شود. یک نمودار قرمز به صورت پیوسته نت‌های تصادفی دو ماژور را رسم می‌کند. شما باید بخوانید تا خط سبز (صدای شما) روی خط قرمز قفل شود. این یک بازی ۳۰ ثانیه‌ای است!</p>
+                <button class="btn" style="margin-top:15px;" id="btnStartGame">شروع بازی (۳۰ ثانیه)</button>
+            </div>
+            <div class="card hidden" id="gameListeningCard">
+                <div class="status-box pulse">بخوانید! خط سبز را روی خط قرمز نگه دارید...</div>
+                <canvas id="gameGraph" style="margin-top:15px; height: 250px;"></canvas>
+            </div>
+            <div class="card hidden" id="gameResultCard">
+                <h3>نتیجه بازی</h3><div id="gameResultContent"></div>
+                <button class="btn" style="margin-top:15px;" id="btnNextGame">شروع مجدد بازی</button>
             </div>
         </div>
 
@@ -217,10 +183,7 @@
         <div id="view-dynamic" class="view">
             <div class="card">
                 <h3>تمرین داینامیک پله‌ای (Crescendo)</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">
-                    شما یک نت را ۱۰ ثانیه می‌خوانید. در این مدت، داینامیک هدف در ۵ مرحله تغییر می‌کند (pp, p, mf, f, ff).
-                    شما باید ولوم صدای خود را دقیقاً با کلمات و خط قرمز هماهنگ کنید. این تمرین کنترل تنفس و حنجره را به شدت تقویت می‌کند.
-                </p>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">شما یک نت را ۱۰ ثانیه می‌خوانید. در این مدت، داینامیک هدف در ۵ مرحله تغییر می‌کند (pp, p, mf, f, ff). شما باید ولوم صدای خود را دقیقاً با کلمات و خط قرمز هماهنگ کنید.</p>
                 <button class="btn" style="margin-top:15px;" id="btnStartDynamic">شروع تمرین داینامیک</button>
             </div>
             <div class="card hidden" id="dynamicTargetCard">
@@ -234,32 +197,18 @@
                 <canvas id="dynamicGraph" style="margin-top:15px; height: 250px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopDynamic">پایان و تحلیل</button>
             </div>
-            <div class="card hidden" id="dynamicResultCard">
-                <h3>نتیجه تحلیل داینامیک</h3>
-                <div id="dynamicResultContent"></div>
-                <button class="btn" style="margin-top:15px;" id="btnNextDynamic">داینامیک بعدی</button>
-            </div>
+            <div class="card hidden" id="dynamicResultCard"><h3>نتیجه تحلیل داینامیک</h3><div id="dynamicResultContent"></div><button class="btn" style="margin-top:15px;" id="btnNextDynamic">داینامیک بعدی</button></div>
         </div>
 
         <!-- Analytics View -->
         <div id="view-analytics" class="view">
+            <div class="card"><h3>تحلیل عملکرد</h3><span class="label">روند امتیاز کلی</span><canvas id="chartProgress" style="height:120px;"></canvas></div>
             <div class="card">
-                <h3>تحلیل عملکرد</h3>
-                <span class="label">روند امتیاز کلی</span>
-                <canvas id="chartProgress" style="height:120px;"></canvas>
-            </div>
-            <div class="card">
-                <h3>تحلیل نقاط ضعف فواصل</h3>
-                <div id="weaknessAnalysis" class="analysis-text">در حال تحلیل... نیاز به تمرین بیشتری است.</div>
-                <div style="overflow-x:auto; margin-top:15px;">
-                    <table class="table" id="intervalStatsTable">
-                        <thead><tr><th>فاصله</th><th>جهت</th><th>تعداد</th><th>میانگین</th><th>خطا</th></tr></thead>
-                        <tbody id="intervalStatsBody"></tbody>
-                    </table>
-                </div>
+                <h3>تحلیل نقاط ضعف فواصل</h3><div id="weaknessAnalysis" class="analysis-text">در حال تحلیل... نیاز به تمرین بیشتری است.</div>
+                <div style="overflow-x:auto; margin-top:15px;"><table class="table" id="intervalStatsTable"><thead><tr><th>فاصله</th><th>جهت</th><th>تعداد</th><th>میانگین</th><th>خطا</th></tr></thead><tbody id="intervalStatsBody"></tbody></table></div>
             </div>
             <div class="card"><h3>آمار تک‌نت و رندوم نت</h3><div id="pitchStats" class="stat-grid"></div></div>
-            <div class="card"><h3>آمار داینامیک</h3><div id="dynamicStats" class="stat-grid"></div></div>
+            <div class="card"><h3>آمار بازی و داینامیک</h3><div id="dynamicStats" class="stat-grid"></div></div>
         </div>
 
         <!-- Settings View -->
@@ -283,10 +232,7 @@
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">با این دکمه می‌توانید تمام تاریخچه تمرین‌های خود را به صورت یک فایل دانلود کنید تا به هوش مصنوعی بدهید یا بایگانی کنید.</p>
                 <button class="btn btn-secondary" style="margin-top:15px;" id="btnExportData">دانلود خروجی داده‌ها (JSON)</button>
             </div>
-            <div class="card">
-                <h3>پایان جلسه</h3>
-                <button class="btn btn-danger" style="margin-top:15px;" id="btnEndSession">پایان تمرین امروز</button>
-            </div>
+            <div class="card"><h3>پایان جلسه</h3><button class="btn btn-danger" style="margin-top:15px;" id="btnEndSession">پایان تمرین امروز</button></div>
             <div class="card hidden" id="sessionReportCard"><h3>گزارش تمرین امروز</h3><div id="sessionReportContent"></div></div>
         </div>
     </div>
@@ -295,6 +241,7 @@
         <button class="nav-btn active" data-view="tuner" id="navTuner"><svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 0-2 2v10.5a4 4 0 1 0 4 0V4a2 2 0 0 0-2-2z"/></svg><span>تیونر</span></button>
         <button class="nav-btn" data-view="intervals" id="navIntervals"><svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg><span>فواصل</span></button>
         <button class="nav-btn" data-view="random" id="navRandom"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>رندوم نت</span></button>
+        <button class="nav-btn" data-view="game" id="navGame"><svg viewBox="0 0 24 24"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM11 13H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>بازی نت</span></button>
         <button class="nav-btn" data-view="dynamic" id="navDynamic"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span>داینامیک</span></button>
         <button class="nav-btn" data-view="analytics" id="navAnalytics"><svg viewBox="0 0 24 24"><path d="M3 17h4v4H3v-4zm6-6h4v10H9V11zm6-6h4v16h-4V5z"/></svg><span>تحلیل</span></button>
         <button class="nav-btn" data-view="settings" id="navSettings"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>تنظیمات</span></button>
@@ -309,7 +256,8 @@ const State = {
     pitchHistory: [], buffer: new Float32Array(4096), 
     exState: 'IDLE', detectedPitches: [], detectedVolumes: [], targetMidi: 0, lastInterval: null, lastRandomSeq: [], 
     targetDynamicCurve: [], dynamicStartTime: 0, dynamicDuration: 0,
-    targetRandomCurve: [], randomStartTime: 0, randomTotalDuration: 0
+    targetRandomCurve: [], randomStartTime: 0, randomTotalDuration: 0,
+    gameTargetCurve: [], gameUserPitches: [], gameStartTime: 0, gameDuration: 30, gameLastNoteTime: 0
 };
 
 const DYNAMICS = [
@@ -340,6 +288,8 @@ const SCALES = {
     'D Minor': [62, 64, 65, 67, 69, 70, 72, 74],
     'Chromatic': [60,61,62,63,64,65,66,67,68,69,70,71,72]
 };
+
+const C_MAJOR_GAME = [60, 62, 64, 65, 67, 69, 71, 72];
 
 async function initAudio() {
     const errEl = document.getElementById('initError');
@@ -432,6 +382,16 @@ function startTunerLoop() {
         if (State.exState === 'LISTENING') {
             if (State.currentExercise && State.currentExercise.type === 'dynamic') {
                 drawDynamicGraph(rms);
+            } else if (State.currentExercise && State.currentExercise.type === 'game') {
+                let nowT = (performance.now() - State.gameStartTime) / 1000;
+                // Generate upcoming notes
+                while (nowT + 2.0 > State.gameLastNoteTime) {
+                    let midi = C_MAJOR_GAME[Math.floor(Math.random() * C_MAJOR_GAME.length)];
+                    State.gameTargetCurve.push({ startT: State.gameLastNoteTime, endT: State.gameLastNoteTime + 1.5, midi: midi });
+                    State.gameLastNoteTime += 1.5;
+                }
+                if (confidence > State.settings.confThreshold) State.gameUserPitches.push({ freq, t: nowT });
+                drawGameGraph(nowT);
             } else if (State.currentExercise && State.currentExercise.type === 'random') {
                 if (confidence > State.settings.confThreshold) State.detectedPitches.push({ freq, time: performance.now() });
                 drawRandomGraph();
@@ -622,13 +582,10 @@ function stopRandomListening() {
     }
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
-
 function drawRandomGraph() {
-    const c = document.getElementById('randomGraph');
-    if (!c) return;
+    const c = document.getElementById('randomGraph'); if (!c) return;
     if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
-    const ctx = c.getContext('2d'); const w = c.width, h = c.height;
-    if (w === 0) return;
+    const ctx = c.getContext('2d'); const w = c.width, h = c.height; if (w === 0) return;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
     const duration = State.randomTotalDuration; const elapsed = (performance.now() - State.randomStartTime) / 1000;
     ctx.strokeStyle = 'rgba(255,0,85,0.8)'; ctx.lineWidth = 4; ctx.beginPath();
@@ -654,102 +611,174 @@ function drawRandomGraph() {
     ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, h); ctx.stroke();
 }
 
+// --- GAME (NOTE CHASING) ---
+async function startGameExercise() {
+    if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
+    document.getElementById('gameResultCard').classList.add('hidden');
+    document.getElementById('gameListeningCard').classList.remove('hidden');
+    
+    State.currentExercise = { type: 'game' };
+    State.gameTargetCurve = [];
+    State.gameUserPitches = [];
+    State.gameStartTime = performance.now();
+    State.gameLastNoteTime = 0;
+    State.exState = 'LISTENING';
+    
+    // Pre-generate the first few notes
+    while (State.gameLastNoteTime < 2.0) {
+        let midi = C_MAJOR_GAME[Math.floor(Math.random() * C_MAJOR_GAME.length)];
+        State.gameTargetCurve.push({ startT: State.gameLastNoteTime, endT: State.gameLastNoteTime + 1.5, midi: midi });
+        State.gameLastNoteTime += 1.5;
+    }
+
+    setTimeout(() => { if (State.exState === 'LISTENING') stopGame(); }, State.gameDuration * 1000);
+}
+
+function stopGame() {
+    if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
+    document.getElementById('gameListeningCard').classList.add('hidden');
+    
+    if (State.gameUserPitches.length < 20) {
+        document.getElementById('gameResultContent').innerHTML = `<div class="status-box" style="color:var(--accent-2);">صدای کافی برای امتیازدهی دریافت نشد.</div>`;
+        document.getElementById('gameResultCard').classList.remove('hidden'); return;
+    }
+
+    let correctCount = 0; let totalError = 0; let totalValidPitches = 0;
+    
+    State.gameUserPitches.forEach(p => {
+        const activeSeg = State.gameTargetCurve.find(seg => p.t >= seg.startT && p.t < seg.endT);
+        if (!activeSeg) return;
+        
+        totalValidPitches++;
+        const userMidi = freqToMidi(p.freq);
+        
+        if (userMidi % 12 === activeSeg.midi % 12) {
+            correctCount++;
+            totalError += Math.abs(getCents(p.freq, midiToFreq(userMidi)));
+        } else {
+            totalError += 50; // Penalty for wrong note
+        }
+    });
+    
+    const accuracy = (correctCount / totalValidPitches) * 100;
+    const avgError = totalError / totalValidPitches;
+    const score = Math.round(accuracy * 0.6 + Math.max(0, 100 - avgError * 2) * 0.4);
+    
+    document.getElementById('gameResultContent').innerHTML = `
+        <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">امتیاز بازی</div><div class="stat-value">${score}%</div></div>
+            <div class="stat-item"><div class="stat-label">دقت نت‌خوانی</div><div class="stat-value">${Math.round(accuracy)}%</div></div>
+        </div>
+        <div class="analysis-text" style="margin-top:15px;">شما در این بازی ${correctCount} فریم از ${totalValidPitches} فریم بررسی شده را درست خوانده‌اید. هرچه خط سبز دقیق‌تر روی خط قرمز باشد، امتیاز شما بالاتر می‌رود.</div>
+    `;
+    saveAttempt({ timestamp: Date.now(), type: 'game', score: score, valid: true });
+    document.getElementById('gameResultCard').classList.remove('hidden');
+}
+
+function drawGameGraph(currentT) {
+    const c = document.getElementById('gameGraph'); if (!c) return;
+    if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
+    const ctx = c.getContext('2d'); const w = c.width, h = c.height; if (w === 0) return;
+    ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
+
+    const windowPast = 6.0; const windowFuture = 2.0; const windowSize = windowPast + windowFuture;
+    const startWindowT = currentT - windowPast; const endWindowT = currentT + windowFuture;
+    const tToX = (t) => ((t - startWindowT) / windowSize) * w;
+    const freqToY = (freq) => { let y = h - ((Math.log2(freq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h; return Math.max(0, Math.min(h, y)); };
+
+    // Draw target curve (Red Step Graph)
+    ctx.strokeStyle = 'rgba(255,0,85,0.8)'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); let lastX = -1, lastY = -1;
+    State.gameTargetCurve.forEach((p) => {
+        if (p.endT < startWindowT) return;
+        if (p.startT > endWindowT) return;
+        let x1 = tToX(Math.max(p.startT, startWindowT));
+        let x2 = tToX(Math.min(p.endT, endWindowT));
+        let y = freqToY(midiToFreq(p.midi));
+        if (lastX === -1) { ctx.moveTo(x1, y); } 
+        else { ctx.lineTo(x1, lastY); ctx.lineTo(x1, y); }
+        ctx.lineTo(x2, y);
+        lastX = x2; lastY = y;
+    });
+    ctx.stroke();
+
+    // Draw user curve (Green)
+    ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 4; ctx.beginPath(); let started = false;
+    State.gameUserPitches.forEach((p) => {
+        if (p.t < startWindowT || p.t > currentT) return; 
+        let x = tToX(p.t); let y = freqToY(p.freq);
+        if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw playhead (White vertical line)
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); let playheadX = tToX(currentT); ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, h); ctx.stroke();
+    ctx.setLineDash([]);
+}
+
 // --- DYNAMIC ---
 async function startDynamicExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('dynamicResultCard').classList.add('hidden'); document.getElementById('dynamicTargetCard').classList.remove('hidden'); document.getElementById('dynamicListeningCard').classList.remove('hidden');
-    
     const targetMidi = 41 + Math.floor(Math.random() * 25);
     State.currentExercise = { type: 'dynamic', targetMidi }; State.targetMidi = targetMidi;
     document.getElementById('dynTargetNote').innerText = `${midiToNoteName(targetMidi).persian} ${midiToNoteName(targetMidi).octave}`;
-    
-    // Generate 5 segments of 2 seconds each (10 seconds total)
-    const duration = 10.0; 
-    const segments = 5;
-    const segDur = duration / segments;
-    const curve = [];
-    
-    // Generate random ascending or descending dynamic steps
-    let isCrescendo = Math.random() > 0.5;
-    let availableDynamics = [...DYNAMICS];
+    const duration = 10.0; const segments = 5; const segDur = duration / segments; const curve = [];
+    let isCrescendo = Math.random() > 0.5; let availableDynamics = [...DYNAMICS];
     if (isCrescendo) availableDynamics.reverse();
-    
-    // Pick 5 consecutive or semi-random steps
     let startIndex = Math.floor(Math.random() * (availableDynamics.length - segments + 1));
     for(let i=0; i<segments; i++) {
         const dyn = availableDynamics[startIndex + i];
         curve.push({ t: i * segDur, endT: (i + 1) * segDur, vol: dyn.vol, name: dyn.name });
     }
-    
     State.targetDynamicCurve = curve; State.dynamicDuration = duration;
     State.exState = 'LISTENING'; State.detectedVolumes = []; State.dynamicStartTime = performance.now();
-    
-    // Play a steady reference note for 10 seconds
     playSineNote(targetMidi, duration, 0);
-    
     setTimeout(() => { if (State.exState === 'LISTENING') stopDynamic(); }, duration * 1000 + 200);
 }
-
 function stopDynamic() {
     if (State.exState !== 'LISTENING') return; State.exState = 'ANALYZING';
-    
     if (State.detectedVolumes.length < 10) {
         document.getElementById('dynamicResultContent').innerHTML = `<div class="status-box" style="color:var(--accent-2);">صدای کافی دریافت نشد.</div>`;
         document.getElementById('dynamicResultCard').classList.remove('hidden'); return;
     }
-    
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01); 
     let totalScore = 0; let segmentFeedback = [];
-
     State.targetDynamicCurve.forEach((seg, idx) => {
-        // Get user volumes in this segment's time window
         const segVolumes = State.detectedVolumes.filter(v => v.t >= seg.t && v.t < seg.endT);
-        
         if (segVolumes.length > 0) {
             const avgVol = segVolumes.reduce((a,b) => a + b.rms, 0) / segVolumes.length;
-            const normUserVol = avgVol / maxUserRms; // Normalize to 0-1
+            const normUserVol = avgVol / maxUserRms; 
             const error = Math.abs(normUserVol - seg.vol);
             const segScore = Math.max(0, 100 - error * 150);
             totalScore += segScore;
             segmentFeedback.push(`${seg.name}: ${segScore.toFixed(0)}%`);
-        } else {
-            segmentFeedback.push(`${seg.name}: صدایی ثبت نشد`);
-        }
+        } else { segmentFeedback.push(`${seg.name}: صدایی ثبت نشد`); }
     });
-    
     const finalScore = Math.round(totalScore / State.targetDynamicCurve.length);
-    
     document.getElementById('dynamicResultContent').innerHTML = `
         <div class="stat-grid">
             <div class="stat-item"><div class="stat-label">امتیاز کل داینامیک</div><div class="stat-value">${finalScore}%</div></div>
             <div class="stat-item"><div class="stat-label">تنوع ولوم</div><div class="stat-value">${(maxUserRms*100).toFixed(0)}%</div></div>
         </div>
-        <div class="analysis-text" style="margin-top:15px;">
-            عملکرد شما در بخش‌های مختلف:<br>
-            ${segmentFeedback.join('<br>')}
-        </div>
+        <div class="analysis-text" style="margin-top:15px;">عملکرد شما در بخش‌های مختلف:<br>${segmentFeedback.join('<br>')}</div>
     `;
     saveAttempt({ timestamp: Date.now(), type: 'dynamic', score: finalScore, valid: true });
     document.getElementById('dynamicResultCard').classList.remove('hidden');
 }
-
 function drawDynamicGraph(rms) {
     const c = document.getElementById('dynamicGraph'); if (!c) return;
     if (c.width !== c.clientWidth) { c.width = c.clientWidth; c.height = c.clientHeight; }
     const ctx = c.getContext('2d'); const w = c.width, h = c.height;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
-    
-    // Draw horizontal lines for dynamic levels
     ctx.strokeStyle = '#2a2f3a'; ctx.lineWidth = 1; ctx.fillStyle = '#8b9bb4'; ctx.font = '12px sans-serif'; ctx.textAlign = 'left';
     DYNAMICS.forEach(d => {
         let y = h - (d.vol * h * 0.9);
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
         ctx.fillText(d.name, 5, y - 2);
     });
-    
     const elapsed = (performance.now() - State.dynamicStartTime) / 1000;
-    
-    // Draw target curve (Red Blocks)
     ctx.strokeStyle = 'rgba(255,0,85,0.8)'; ctx.lineWidth = 4; ctx.beginPath();
     State.targetDynamicCurve.forEach((p, i) => {
         let x1 = (p.t / State.dynamicDuration) * w; let x2 = (p.endT / State.dynamicDuration) * w;
@@ -758,12 +787,8 @@ function drawDynamicGraph(rms) {
         ctx.lineTo(x2, y);
     });
     ctx.stroke();
-    
-    // Record user volume
     let t = (performance.now() - State.dynamicStartTime) / 1000;
     if (rms > State.noiseFloor && t <= State.dynamicDuration) State.detectedVolumes.push({ rms, t });
-    
-    // Draw user curve (Green)
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
     ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 3; ctx.beginPath();
     State.detectedVolumes.forEach((p, i) => {
@@ -771,13 +796,9 @@ function drawDynamicGraph(rms) {
         if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
-    
-    // Draw playhead
     ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2; ctx.beginPath();
     let playheadX = (elapsed / State.dynamicDuration) * w; if (playheadX > w) playheadX = w;
     ctx.moveTo(playheadX, 0); ctx.lineTo(playheadX, h); ctx.stroke();
-    
-    // Update current dynamic text
     const currentSeg = State.targetDynamicCurve.find(s => t >= s.t && t < s.endT);
     if (currentSeg) document.getElementById('dynCurrentMark').innerText = currentSeg.name;
     else if (t >= State.dynamicDuration) document.getElementById('dynCurrentMark').innerText = "پایان";
@@ -890,10 +911,12 @@ function renderAnalytics(attempts) {
         <div class="stat-item"><div class="stat-label">رندوم نت (تعداد)</div><div class="stat-value">${randomNotes.length}</div></div>
         <div class="stat-item"><div class="stat-label">میانگین رندوم نت</div><div class="stat-value">${avg(randomNotes)}</div></div>
     `;
-    const dynamics = attempts.filter(a => a.type === 'dynamic');
+    const dynamics = attempts.filter(a => a.type === 'dynamic'); const games = attempts.filter(a => a.type === 'game');
     document.getElementById('dynamicStats').innerHTML = `
-        <div class="stat-item"><div class="stat-label">تعداد تمرین داینامیک</div><div class="stat-value">${dynamics.length}</div></div>
-        <div class="stat-item"><div class="stat-label">میانگین دقت داینامیک</div><div class="stat-value">${avg(dynamics)}</div></div>
+        <div class="stat-item"><div class="stat-label">تعداد بازی</div><div class="stat-value">${games.length}</div></div>
+        <div class="stat-item"><div class="stat-label">میانگین امتیاز بازی</div><div class="stat-value">${avg(games)}</div></div>
+        <div class="stat-item"><div class="stat-label">تعداد داینامیک</div><div class="stat-value">${dynamics.length}</div></div>
+        <div class="stat-item"><div class="stat-label">میانگین داینامیک</div><div class="stat-value">${avg(dynamics)}</div></div>
     `;
 }
 
@@ -928,6 +951,7 @@ function attachEventListeners() {
     document.getElementById('navTuner').addEventListener('click', () => navigateTo('tuner', 'تیونر'));
     document.getElementById('navIntervals').addEventListener('click', () => navigateTo('intervals', 'تمرین فواصل'));
     document.getElementById('navRandom').addEventListener('click', () => navigateTo('random', 'رندوم نت'));
+    document.getElementById('navGame').addEventListener('click', () => navigateTo('game', 'بازی نت‌خوانی'));
     document.getElementById('navDynamic').addEventListener('click', () => navigateTo('dynamic', 'داینامیک'));
     document.getElementById('navAnalytics').addEventListener('click', () => navigateTo('analytics', 'تحلیل عملکرد'));
     document.getElementById('navSettings').addEventListener('click', () => navigateTo('settings', 'تنظیمات'));
@@ -945,6 +969,9 @@ function attachEventListeners() {
     document.getElementById('btnPlayLastRandom').addEventListener('click', async () => { if (State.lastRandomSeq && !State.isPlayingRef) await playSequence(State.lastRandomSeq); });
     document.getElementById('btnStopRandomListening').addEventListener('click', stopRandomListening);
     document.getElementById('btnNextRandom').addEventListener('click', startRandomExercise);
+
+    document.getElementById('btnStartGame').addEventListener('click', startGameExercise);
+    document.getElementById('btnNextGame').addEventListener('click', startGameExercise);
 
     document.getElementById('btnStartDynamic').addEventListener('click', startDynamicExercise);
     document.getElementById('btnStopDynamic').addEventListener('click', stopDynamic);
