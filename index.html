@@ -1,4 +1,4 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -253,6 +253,7 @@
             flex-direction: column;
             gap: 20px;
             text-align: center;
+            overflow-y: auto;
         }
 
         .hidden {
@@ -348,12 +349,12 @@
     <p>به برنامه تمرین اینتونیشن و فواصل خوش آمدید.</p>
     <p style="color:var(--accent);">برای دقت بالا در تمرین فواصل، حتماً از هندزفری استفاده کنید تا صدای مرجع وارد میکروفون نشود.</p>
     <p style="font-size:0.8rem; color:var(--text-muted);">صدای شما فقط در همین دستگاه پردازش می‌شود، ضبط یا ارسال نمی‌شود.</p>
-    <button class="btn" onclick="initAudio()">اجازه دسترسی به میکروفون و شروع</button>
-    <div id="initError" style="color:var(--accent-2); font-size:0.9rem; white-space:pre-wrap;"></div>
+    <button class="btn" id="btnInitAudio">اجازه دسترسی به میکروفون و شروع</button>
+    <div id="initError" style="color:var(--accent-2); font-size:0.9rem; white-space:pre-wrap; text-align:left; direction:ltr; width:100%; max-width:720px; max-height:40vh; overflow:auto; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;"></div>
 
     <div id="micDiagnostics" class="status-box" style="width:100%; max-width:720px; text-align:right; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; direction:ltr; white-space:pre-wrap; overflow:auto; max-height:34vh;"></div>
 
-    <button class="btn btn-secondary" style="max-width:720px;" onclick="runMicDiagnostics()">بررسی وضعیت میکروفون</button>
+    <button class="btn btn-secondary" style="max-width:720px;" id="btnRunDiagnostics">بررسی وضعیت میکروفون</button>
 </div>
 
 <div id="app">
@@ -409,10 +410,10 @@
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">سیستم دو نت تصادفی در محدوده فا ۲ تا فا ۴ پخش می‌کند. شما باید فاصله بین آن‌ها را بخوانید.</p>
                 
                 <div class="row" style="margin-top:15px;">
-                    <button class="btn btn-secondary" style="flex:1;" onclick="playLastInterval()">پخش مجدد مرجع</button>
+                    <button class="btn btn-secondary" style="flex:1;" id="btnPlayLastInterval">پخش مجدد مرجع</button>
                 </div>
                 
-                <button class="btn" style="margin-top:15px;" id="btnStartInterval" onclick="startIntervalExercise()">شروع فاصله تصادفی</button>
+                <button class="btn" style="margin-top:15px;" id="btnStartInterval">شروع فاصله تصادفی</button>
             </div>
 
             <div class="card hidden" id="intervalTargetCard">
@@ -441,13 +442,13 @@
             <div class="card hidden" id="intervalListeningCard">
                 <div class="status-box pulse" id="listeningStatus">در حال گوش دادن... بخوانید!</div>
                 <canvas id="intervalGraph" style="margin-top:15px;"></canvas>
-                <button class="btn btn-danger" style="margin-top:15px;" onclick="stopListening()">پایان و تحلیل</button>
+                <button class="btn btn-danger" style="margin-top:15px;" id="btnStopListening">پایان و تحلیل</button>
             </div>
 
             <div class="card hidden" id="intervalResultCard">
                 <h3>نتیجه تحلیل</h3>
                 <div id="intervalResultContent"></div>
-                <button class="btn" style="margin-top:15px;" onclick="startIntervalExercise()">فاصله بعدی</button>
+                <button class="btn" style="margin-top:15px;" id="btnNextInterval">فاصله بعدی</button>
             </div>
         </div>
 
@@ -482,7 +483,7 @@
                         </select>
                     </div>
                 </div>
-                <button class="btn" style="margin-top:15px;" id="btnStartRandom" onclick="startRandomExercise()">تولید و پخش نت‌ها</button>
+                <button class="btn" style="margin-top:15px;" id="btnStartRandom">تولید و پخش نت‌ها</button>
             </div>
 
             <div class="card hidden" id="randomSequenceCard">
@@ -493,13 +494,13 @@
             <div class="card hidden" id="randomListeningCard">
                 <div class="status-box pulse" id="randomListenStatus">بخوانید...</div>
                 <canvas id="randomGraph" style="margin-top:15px;"></canvas>
-                <button class="btn btn-danger" style="margin-top:15px;" onclick="stopRandomListening()">پایان و تحلیل</button>
+                <button class="btn btn-danger" style="margin-top:15px;" id="btnStopRandomListening">پایان و تحلیل</button>
             </div>
 
             <div class="card hidden" id="randomResultCard">
                 <h3>نتیجه تحلیل</h3>
                 <div id="randomResultContent"></div>
-                <button class="btn" style="margin-top:15px;" onclick="startRandomExercise()">توالی بعدی</button>
+                <button class="btn" style="margin-top:15px;" id="btnNextRandom">توالی بعدی</button>
             </div>
         </div>
 
@@ -549,11 +550,11 @@
                 <div class="col" style="margin-top:15px;">
                     <div>
                         <span class="label">صدای مرجع (Volume)</span>
-                        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5" oninput="setRefVolume(this.value)">
+                        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5">
                     </div>
                     <div>
                         <span class="label">فرکانس پایه (A4 = ... Hz)</span>
-                        <select id="a4Select" onchange="setA4(this.value)">
+                        <select id="a4Select">
                             <option value="440" selected>۴۴۰ Hz</option>
                             <option value="432">۴۳۲ Hz</option>
                             <option value="442">۴۴۲ Hz</option>
@@ -561,7 +562,7 @@
                     </div>
                     <div>
                         <span class="label">حساسیت تشخیص (Confidence Threshold)</span>
-                        <select id="confSelect" onchange="setConfThreshold(this.value)">
+                        <select id="confSelect">
                             <option value="0.85" selected>بالا (سخت‌گیرانه)</option>
                             <option value="0.75">متوسط</option>
                             <option value="0.65">پایین (محیط شلوغ)</option>
@@ -573,14 +574,14 @@
             <div class="card">
                 <h3>کالیبراسیون میکروفون</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">در محیطی که هستید، ۳ ثانیه سکوت کنید تا نویز پس‌زمینه محاسبه شود.</p>
-                <button class="btn btn-secondary" style="margin-top:15px;" onclick="calibrateMic()">شروع کالیبراسیون</button>
+                <button class="btn btn-secondary" style="margin-top:15px;" id="btnCalibrate">شروع کالیبراسیون</button>
                 <div id="calibStatus" style="text-align:center; margin-top:10px; color:var(--success);"></div>
             </div>
 
             <div class="card">
                 <h3>پایان جلسه</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">برای ذخیره آمار امروز و دریافت گزارش، جلسه را پایان دهید.</p>
-                <button class="btn btn-danger" style="margin-top:15px;" onclick="endSession()">پایان تمرین امروز</button>
+                <button class="btn btn-danger" style="margin-top:15px;" id="btnEndSession">پایان تمرین امروز</button>
             </div>
 
             <div class="card hidden" id="sessionReportCard">
@@ -592,23 +593,23 @@
     </div>
 
     <nav class="nav-bottom">
-        <button class="nav-btn active" data-view="tuner" onclick="navigateTo('tuner', 'تیونر')">
+        <button class="nav-btn active" data-view="tuner" id="navTuner">
             <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 0-2 2v10.5a4 4 0 1 0 4 0V4a2 2 0 0 0-2-2z"/></svg>
             <span>تیونر</span>
         </button>
-        <button class="nav-btn" data-view="intervals" onclick="navigateTo('intervals', 'تمرین فواصل')">
+        <button class="nav-btn" data-view="intervals" id="navIntervals">
             <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
             <span>فواصل</span>
         </button>
-        <button class="nav-btn" data-view="random" onclick="navigateTo('random', 'رندوم نت')">
+        <button class="nav-btn" data-view="random" id="navRandom">
             <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
             <span>رندوم نت</span>
         </button>
-        <button class="nav-btn" data-view="analytics" onclick="navigateTo('analytics', 'تحلیل عملکرد')">
+        <button class="nav-btn" data-view="analytics" id="navAnalytics">
             <svg viewBox="0 0 24 24"><path d="M3 17h4v4H3v-4zm6-6h4v10H9V11zm6-6h4v16h-4V5z"/></svg>
             <span>تحلیل</span>
         </button>
-        <button class="nav-btn" data-view="settings" onclick="navigateTo('settings', 'تنظیمات')">
+        <button class="nav-btn" data-view="settings" id="navSettings">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
             <span>تنظیمات</span>
         </button>
@@ -688,17 +689,23 @@ const SCALES = {
 };
 
 // ====================================================================
-// INITIALIZATION
+// INITIALIZATION — MIC AUDIO
 // ====================================================================
+// CRITICAL FIX:
+// getUserMedia() is the VERY FIRST async operation in this function.
+// No await before it. This preserves the transient user activation
+// from the click event. Previously, an `await navigator.permissions.query()`
+// sat before getUserMedia, which could cause the browser to lose
+// the user-gesture context and throw NotAllowedError without ever
+// showing the permission prompt.
+
 async function initAudio() {
     const errEl = document.getElementById('initError');
     const diagEl = document.getElementById('micDiagnostics');
     errEl.innerText = '';
+    errEl.style.display = 'none';
 
-    // IMPORTANT:
-    // getUserMedia() is called directly from the user's click handler.
-    // Do not put an await before this call: some browser permission flows
-    // are sensitive to the original user-activation context.
+    // --- Synchronous environment checks (no await) ---
     const diagnostic = {
         time: new Date().toISOString(),
         protocol: window.location.protocol,
@@ -711,61 +718,69 @@ async function initAudio() {
         userAgent: navigator.userAgent,
         permissionsAPIExists: !!navigator.permissions,
         permissionState: 'unknown',
-        topLevel: window.top === window.self
+        topLevel: window.top === window.self,
+        isInIframe: window.top !== window.self,
+        iframeAllow: 'N/A'
     };
 
+    // Check Feature-Policy / Permissions-Policy for microphone
     try {
-        if (navigator.permissions && navigator.permissions.query) {
-            try {
-                const permission = await navigator.permissions.query({ name: 'microphone' });
-                diagnostic.permissionState = permission.state;
-                permission.onchange = () => runMicDiagnostics();
-            } catch (permissionError) {
-                diagnostic.permissionQueryError =
-                    `${permissionError.name || 'UnknownError'}: ${permissionError.message || String(permissionError)}`;
-            }
+        const fp = document.featurePolicy || (window.featurePolicy ? window.featurePolicy : null);
+        if (fp && typeof fp.allowedFeatures === 'function') {
+            diagnostic.featurePolicyMicrophone = fp.allowedFeatures().includes('microphone');
+        } else {
+            diagnostic.featurePolicyMicrophone = 'Feature-Policy API unavailable';
         }
     } catch (e) {
-        diagnostic.permissionQueryError =
-            `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
+        diagnostic.featurePolicyMicrophone = `error: ${e.message}`;
     }
 
-    if (diagEl) diagEl.textContent = formatMicDiagnostics(diagnostic);
+    // If in iframe, check the allow attribute
+    if (diagnostic.isInIframe) {
+        try {
+            if (window.frameElement) {
+                diagnostic.iframeAllow = window.frameElement.getAttribute('allow') || '(empty allow attribute)';
+            } else {
+                diagnostic.iframeAllow = 'cross-origin iframe (cannot inspect allow attribute)';
+            }
+        } catch(e) {
+            diagnostic.iframeAllow = `cannot read: ${e.message}`;
+        }
+    }
 
-    if (!window.isSecureContext ||
-        (window.location.protocol !== 'https:' &&
-         window.location.hostname !== 'localhost' &&
-         window.location.hostname !== '127.0.0.1')) {
-        const msg =
-            'SECURE CONTEXT ERROR\n' +
-            'این صفحه در یک Context امن اجرا نمی‌شود.\n' +
-            `protocol=${window.location.protocol}\n` +
-            `isSecureContext=${window.isSecureContext}\n` +
-            'برای GitHub Pages باید آدرس با https:// شروع شود.';
-        errEl.innerText = msg;
+    // Quick synchronous guard: if mediaDevices doesn't exist at all
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        errEl.style.display = 'block';
+        errEl.innerText = [
+            '╔══════════════════════════════════════════════════╗',
+            '║  navigator.mediaDevices.getUserMedia unavailable  ║',
+            '╚══════════════════════════════════════════════════╝',
+            '',
+            `isSecureContext:    ${diagnostic.isSecureContext}`,
+            `protocol:           ${diagnostic.protocol}`,
+            `origin:             ${diagnostic.origin}`,
+            `mediaDevices:       ${diagnostic.mediaDevicesExists}`,
+            `getUserMedia:       ${diagnostic.getUserMediaExists}`,
+            `topLevel (no iframe): ${diagnostic.topLevel}`,
+            `isInIframe:         ${diagnostic.isInIframe}`,
+            `featurePolicy.mic:  ${diagnostic.featurePolicyMicrophone}`,
+            '',
+            'If isSecureContext is true and mediaDevices is missing,',
+            'the browser may be in a restricted mode or an iframe',
+            'without allow="microphone".'
+        ].join('\n');
+        if (diagEl) diagEl.textContent = formatMicDiagnostics(diagnostic);
+        updateAudioStatus('خطا', 'badge-danger');
         return;
     }
 
-    if (!navigator.mediaDevices) {
-        const msg =
-            'MEDIA DEVICES ERROR\n' +
-            'navigator.mediaDevices وجود ندارد.';
-        errEl.innerText = msg;
-        return;
-    }
-
-    if (!navigator.mediaDevices.getUserMedia) {
-        const msg =
-            'GETUSERMEDIA ERROR\n' +
-            'navigator.mediaDevices.getUserMedia وجود ندارد.';
-        errEl.innerText = msg;
-        return;
-    }
-
-    // Call getUserMedia BEFORE creating/awaiting AudioContext so the permission
-    // request remains directly associated with this user interaction.
-    let stream;
-    let firstError = null;
+    // ================================================================
+    // CRITICAL: getUserMedia is called HERE — as the very first await.
+    // Nothing async happens before this line. The user activation
+    // from the click is fully intact.
+    // ================================================================
+    let stream = null;
+    let micError = null;
 
     try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -778,59 +793,168 @@ async function initAudio() {
             video: false
         });
     } catch (e) {
-        firstError = e;
-        console.error('[MIC getUserMedia] exact error:', e);
-        console.error('[MIC getUserMedia] name:', e && e.name);
-        console.error('[MIC getUserMedia] message:', e && e.message);
-        console.error('[MIC getUserMedia] constraint:', e && e.constraint);
+        micError = e;
+        console.error('[MIC getUserMedia] Error:', e);
 
-        // Some browsers reject optional/advanced audio constraints.
-        // Retry once with the browser's simplest valid microphone request.
-        if (e && (e.name === 'OverconstrainedError' || e.name === 'TypeError')) {
+        // Retry with the simplest possible constraints (no advanced audio options).
+        // OverconstrainedError or TypeError mean the constraints were rejected,
+        // NOT a permission issue — but retrying costs nothing.
+        if (e && (e.name === 'OverconstrainedError' || e.name === 'TypeError' || e.name === 'NotFoundError')) {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: false
-                });
-                firstError = null;
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                micError = null; // fallback succeeded
             } catch (fallbackError) {
-                console.error('[MIC fallback] exact error:', fallbackError);
-                e = fallbackError;
+                console.error('[MIC fallback] Error:', fallbackError);
+                micError = fallbackError;
             }
-        }
-
-        if (!stream) {
-            const exact =
-                `MICROPHONE REQUEST FAILED\n` +
-                `name: ${e && e.name ? e.name : 'UnknownError'}\n` +
-                `message: ${e && e.message ? e.message : String(e)}\n` +
-                `constraint: ${e && e.constraint ? e.constraint : 'none'}\n\n` +
-                `permissionState: ${diagnostic.permissionState}\n` +
-                `isSecureContext: ${window.isSecureContext}\n` +
-                `origin: ${window.location.origin}\n` +
-                `mediaDevices: ${!!navigator.mediaDevices}\n` +
-                `getUserMedia: ${!!navigator.mediaDevices?.getUserMedia}\n\n` +
-                `اگر name برابر NotAllowedError است و پنجره اجازه نمی‌آید، معمولاً مجوز قبلاً Block شده یا Permission Policy/تنظیمات Chrome مانع درخواست شده است.`;
-
-            errEl.innerText = exact;
-            if (diagEl) {
-                diagEl.textContent = formatMicDiagnostics({
-                    ...diagnostic,
-                    lastErrorName: e && e.name ? e.name : 'UnknownError',
-                    lastErrorMessage: e && e.message ? e.message : String(e),
-                    lastErrorConstraint: e && e.constraint ? e.constraint : 'none'
-                });
-            }
-            updateAudioStatus('خطا', 'badge-danger');
-            return;
         }
     }
 
+    // --- AFTER getUserMedia: query permission state for diagnostics ---
+    // This is intentionally placed AFTER getUserMedia so it never
+    // interferes with the user-activation chain.
+    try {
+        if (navigator.permissions && navigator.permissions.query) {
+            const p = await navigator.permissions.query({ name: 'microphone' });
+            diagnostic.permissionState = p.state;
+        }
+    } catch (e) {
+        diagnostic.permissionQueryError = `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
+    }
+
+    // --- Handle getUserMedia failure ---
+    if (micError || !stream) {
+        const e = micError || new Error('getUserMedia returned null stream with no error');
+        const errorName = (e && e.name) ? e.name : 'UnknownError';
+        const errorMsg = (e && e.message) ? e.message : String(e);
+        const errorStack = (e && e.stack) ? e.stack : '(no stack trace available)';
+        const errorConstraint = (e && e.constraint) ? e.constraint : 'none';
+
+        // Build the full error display
+        const lines = [
+            '╔══════════════════════════════════════════════════════════════╗',
+            '║              MICROPHONE ACCESS FAILED                         ║',
+            '╚══════════════════════════════════════════════════════════════╝',
+            '',
+            '┌─── Error Details ────────────────────────────────────────────┐',
+            `│ error.name:       ${errorName}`,
+            `│ error.message:    ${errorMsg}`,
+            `│ error.constraint: ${errorConstraint}`,
+            '└──────────────────────────────────────────────────────────────┘',
+            '',
+            '┌─── Stack Trace ─────────────────────────────────────────────┐',
+            errorStack,
+            '└──────────────────────────────────────────────────────────────┘',
+            '',
+            '┌─── Environment ─────────────────────────────────────────────┐',
+            `│ isSecureContext:     ${diagnostic.isSecureContext}`,
+            `│ protocol:            ${diagnostic.protocol}`,
+            `│ origin:              ${diagnostic.origin}`,
+            `│ hostname:            ${diagnostic.hostname}`,
+            `│ topLevel (no iframe):  ${diagnostic.topLevel}`,
+            `│ isInIframe:          ${diagnostic.isInIframe}`,
+            `│ iframe allow attr:   ${diagnostic.iframeAllow}`,
+            `│ featurePolicy.mic:   ${diagnostic.featurePolicyMicrophone}`,
+            `│ permission state:    ${diagnostic.permissionState}`,
+            `│ mediaDevices exists: ${diagnostic.mediaDevicesExists}`,
+            `│ getUserMedia exists: ${diagnostic.getUserMediaExists}`,
+            `│ userAgent:           ${diagnostic.userAgent}`,
+            '└──────────────────────────────────────────────────────────────┘',
+        ];
+
+        if (errorName === 'NotAllowedError') {
+            lines.push(
+                '',
+                '┌─── NotAllowedError Troubleshooting ─────────────────────────┐',
+                '│',
+                '│ 1. Chrome site settings:',
+                '│    Go to chrome://settings/content/microphone',
+                '│    Find this site and REMOVE it from both Allow and Block.',
+                '│    Then reload this page and click the button again.',
+                '│    The permission prompt should now appear.',
+                '│',
+                '│ 2. If this page is inside an iframe (isInIframe: true):',
+                '│    The parent page MUST include allow="microphone" on the',
+                '│    <iframe> tag. Without it, getUserMedia is blocked.',
+                '│',
+                '│ 3. Check Permissions-Policy / Feature-Policy:',
+                '│    If featurePolicy.mic is false, the browser is blocking',
+                '│    microphone via HTTP headers. On GitHub Pages this should',
+                '│    not happen, but check if a proxy or CDN adds headers.',
+                '│',
+                '│ 4. OS-level microphone access:',
+                '│    Windows: Settings > Privacy > Microphone — ensure apps',
+                '│    are allowed to use the microphone.',
+                '│    macOS: System Preferences > Security & Privacy >',
+                '│    Microphone — ensure Chrome is allowed.',
+                '│',
+                '│ 5. Try incognito/private mode to rule out extensions.',
+                '│',
+                '│ 6. Check if another tab/app is using the microphone.',
+                '│',
+                '│ 7. If Chrome shows "Allow" but you still get this error:',
+                '│    - Click the lock/icon in the address bar',
+                '│    - Reset microphone permission',
+                '│    - Reload the page',
+                '└──────────────────────────────────────────────────────────────┘'
+            );
+        }
+
+        if (errorName === 'NotFoundError') {
+            lines.push(
+                '',
+                '┌─── NotFoundError Troubleshooting ───────────────────────────┐',
+                '│ No microphone device was found.',
+                '│ - Check that a microphone is connected.',
+                '│ - Check OS sound settings.',
+                '└──────────────────────────────────────────────────────────────┘'
+            );
+        }
+
+        if (errorName === 'NotReadableError') {
+            lines.push(
+                '',
+                '┌─── NotReadableError Troubleshooting ────────────────────────┐',
+                '│ A microphone was found but cannot be read.',
+                '│ - Another application may be using it exclusively.',
+                '│ - The device driver may have crashed.',
+                '│ - Try unplugging and replugging the microphone.',
+                '└──────────────────────────────────────────────────────────────┘'
+            );
+        }
+
+        errEl.style.display = 'block';
+        errEl.innerText = lines.join('\n');
+
+        if (diagEl) {
+            diagEl.textContent = formatMicDiagnostics({
+                ...diagnostic,
+                lastErrorName: errorName,
+                lastErrorMessage: errorMsg,
+                lastErrorStack: errorStack,
+                lastErrorConstraint: errorConstraint
+            });
+        }
+
+        updateAudioStatus('خطا', 'badge-danger');
+        return;
+    }
+
+    // ================================================================
+    // getUserMedia succeeded!
+    // NOW create and resume AudioContext — after the mic is acquired.
+    // ================================================================
     try {
         State.micStream = stream;
 
-        // Create and resume AudioContext after the microphone permission request.
-        State.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Create AudioContext
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) {
+            throw new Error('AudioContext constructor not available (window.AudioContext is undefined)');
+        }
+        State.audioCtx = new Ctx();
+
+        // Resume if suspended (required after user gesture)
         if (State.audioCtx.state === 'suspended') {
             await State.audioCtx.resume();
         }
@@ -840,7 +964,7 @@ async function initAudio() {
         State.refGainNode.gain.value = State.settings.refVolume;
         State.refGainNode.connect(State.audioCtx.destination);
 
-        // Microphone graph: mic -> analyser only. Never connect to destination.
+        // Microphone graph: mic -> analyser ONLY. Never connect to destination.
         State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
         State.analyser = State.audioCtx.createAnalyser();
         State.analyser.fftSize = 2048;
@@ -872,16 +996,32 @@ async function initAudio() {
             startTunerLoop();
         }
     } catch (e) {
-        console.error('[MIC AUDIO INIT] exact error:', e);
-        const exact =
-            `AUDIO INITIALIZATION FAILED\n` +
-            `name: ${e && e.name ? e.name : 'UnknownError'}\n` +
-            `message: ${e && e.message ? e.message : String(e)}\n\n` +
-            `The microphone permission was granted, but the Web Audio graph could not be initialized.`;
+        console.error('[AUDIO INIT] Error:', e);
+        const errorName = (e && e.name) ? e.name : 'UnknownError';
+        const errorMsg = (e && e.message) ? e.message : String(e);
+        const errorStack = (e && e.stack) ? e.stack : '(no stack trace available)';
 
-        errEl.innerText = exact;
+        errEl.style.display = 'block';
+        errEl.innerText = [
+            '╔══════════════════════════════════════════════════════════════╗',
+            '║           AUDIO INITIALIZATION FAILED                        ║',
+            '╚══════════════════════════════════════════════════════════════╝',
+            '',
+            'The microphone permission was granted, but the Web Audio graph',
+            'could not be initialized.',
+            '',
+            `error.name:    ${errorName}`,
+            `error.message: ${errorMsg}`,
+            '',
+            '--- Stack Trace ---',
+            errorStack,
+            '',
+            `AudioContext state: ${State.audioCtx ? State.audioCtx.state : 'not created'}`
+        ].join('\n');
+
         updateAudioStatus('خطا', 'badge-danger');
 
+        // Clean up the stream since we can't use it
         if (State.micStream) {
             State.micStream.getTracks().forEach(t => t.stop());
             State.micStream = null;
@@ -898,28 +1038,43 @@ function updateAudioStatus(text, className) {
 
 function formatMicDiagnostics(d) {
     const lines = [
-        `secureContext: ${d.isSecureContext}`,
-        `protocol: ${d.protocol}`,
-        `origin: ${d.origin}`,
-        `hostname: ${d.hostname}`,
-        `topLevel: ${d.topLevel}`,
-        `navigator.mediaDevices: ${d.mediaDevicesExists}`,
+        '=== MICROPHONE DIAGNOSTICS ===',
+        `time:                   ${d.time || 'N/A'}`,
+        `isSecureContext:        ${d.isSecureContext}`,
+        `protocol:               ${d.protocol}`,
+        `origin:                 ${d.origin}`,
+        `hostname:               ${d.hostname}`,
+        `topLevel (no iframe):   ${d.topLevel}`,
+        `isInIframe:             ${d.isInIframe}`,
+        `iframe allow attribute: ${d.iframeAllow || 'N/A'}`,
+        `navigator.mediaDevices:           ${d.mediaDevicesExists}`,
         `navigator.mediaDevices.getUserMedia: ${d.getUserMediaExists}`,
-        `navigator.permissions: ${d.permissionsAPIExists}`,
-        `microphone permission: ${d.permissionState}`,
-        `userAgent: ${d.userAgent}`
+        `navigator.permissions:  ${d.permissionsAPIExists}`,
+        `microphone permission:  ${d.permissionState}`,
+        `featurePolicy.mic:      ${d.featurePolicyMicrophone !== undefined ? d.featurePolicyMicrophone : 'N/A'}`,
+        `userAgent:              ${d.userAgent}`
     ];
 
     if (d.permissionQueryError) lines.push(`permission query error: ${d.permissionQueryError}`);
-    if (d.lastErrorName) lines.push(`EXACT error.name: ${d.lastErrorName}`);
-    if (d.lastErrorMessage) lines.push(`EXACT error.message: ${d.lastErrorMessage}`);
-    if (d.lastErrorConstraint) lines.push(`EXACT error.constraint: ${d.lastErrorConstraint}`);
-    if ('streamActive' in d) lines.push(`stream.active: ${d.streamActive}`);
-    if ('audioTrackCount' in d) lines.push(`audio tracks: ${d.audioTrackCount}`);
-    if (d.trackLabel) lines.push(`track.label: ${d.trackLabel}`);
-    if (d.trackSettings) lines.push(`track.settings: ${d.trackSettings}`);
-    if (d.audioContextState) lines.push(`AudioContext.state: ${d.audioContextState}`);
-    if (d.success) lines.push('RESULT: microphone stream successfully acquired');
+
+    if (d.lastErrorName) {
+        lines.push('');
+        lines.push('=== LAST ERROR ===');
+        lines.push(`error.name:       ${d.lastErrorName}`);
+        lines.push(`error.message:    ${d.lastErrorMessage}`);
+        if (d.lastErrorConstraint) lines.push(`error.constraint: ${d.lastErrorConstraint}`);
+        if (d.lastErrorStack) {
+            lines.push('--- error.stack ---');
+            lines.push(d.lastErrorStack);
+        }
+    }
+
+    if ('streamActive' in d) lines.push(`\nstream.active:        ${d.streamActive}`);
+    if ('audioTrackCount' in d) lines.push(`audio tracks:         ${d.audioTrackCount}`);
+    if (d.trackLabel) lines.push(`track.label:          ${d.trackLabel}`);
+    if (d.trackSettings) lines.push(`track.settings:       ${d.trackSettings}`);
+    if (d.audioContextState) lines.push(`AudioContext.state:   ${d.audioContextState}`);
+    if (d.success) lines.push('\nRESULT: microphone stream successfully acquired ✓');
 
     return lines.join('\n');
 }
@@ -939,14 +1094,41 @@ async function runMicDiagnostics() {
         getUserMediaExists: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
         permissionsAPIExists: !!navigator.permissions,
         topLevel: window.top === window.self,
+        isInIframe: window.top !== window.self,
+        iframeAllow: 'N/A',
         userAgent: navigator.userAgent
     };
 
+    // Check Feature-Policy
     try {
-        if (navigator.permissions?.query) {
+        const fp = document.featurePolicy || (window.featurePolicy ? window.featurePolicy : null);
+        if (fp && typeof fp.allowedFeatures === 'function') {
+            d.featurePolicyMicrophone = fp.allowedFeatures().includes('microphone');
+        } else {
+            d.featurePolicyMicrophone = 'Feature-Policy API unavailable';
+        }
+    } catch(e) {
+        d.featurePolicyMicrophone = `error: ${e.message}`;
+    }
+
+    // If in iframe, check the allow attribute
+    if (d.isInIframe) {
+        try {
+            if (window.frameElement) {
+                d.iframeAllow = window.frameElement.getAttribute('allow') || '(empty allow attribute)';
+            } else {
+                d.iframeAllow = 'cross-origin iframe (cannot inspect)';
+            }
+        } catch(e) {
+            d.iframeAllow = `cannot read: ${e.message}`;
+        }
+    }
+
+    // Query permission state (safe — does NOT call getUserMedia)
+    try {
+        if (navigator.permissions && navigator.permissions.query) {
             const p = await navigator.permissions.query({ name: 'microphone' });
             d.permissionState = p.state;
-            p.onchange = () => runMicDiagnostics();
         } else {
             d.permissionState = 'Permissions API unavailable';
         }
@@ -1783,11 +1965,54 @@ async function calibrateMic() {
     }, 50);
 }
 
-window.onload = () => {
-    initDB();
-    runMicDiagnostics();
-};
+// ====================================================================
+// EVENT LISTENERS (using addEventListener, NOT inline onclick)
+// ====================================================================
+// We attach listeners after DOM is ready. This is cleaner and ensures
+// the user-activation chain is properly maintained.
 
+function attachEventListeners() {
+    // Welcome overlay buttons
+    document.getElementById('btnInitAudio').addEventListener('click', initAudio);
+    document.getElementById('btnRunDiagnostics').addEventListener('click', runMicDiagnostics);
+
+    // Navigation
+    document.getElementById('navTuner').addEventListener('click', () => navigateTo('tuner', 'تیونر'));
+    document.getElementById('navIntervals').addEventListener('click', () => navigateTo('intervals', 'تمرین فواصل'));
+    document.getElementById('navRandom').addEventListener('click', () => navigateTo('random', 'رندوم نت'));
+    document.getElementById('navAnalytics').addEventListener('click', () => navigateTo('analytics', 'تحلیل عملکرد'));
+    document.getElementById('navSettings').addEventListener('click', () => navigateTo('settings', 'تنظیمات'));
+
+    // Interval trainer
+    document.getElementById('btnStartInterval').addEventListener('click', startIntervalExercise);
+    document.getElementById('btnPlayLastInterval').addEventListener('click', playLastInterval);
+    document.getElementById('btnStopListening').addEventListener('click', stopListening);
+    document.getElementById('btnNextInterval').addEventListener('click', startIntervalExercise);
+
+    // Random notes
+    document.getElementById('btnStartRandom').addEventListener('click', startRandomExercise);
+    document.getElementById('btnStopRandomListening').addEventListener('click', stopRandomListening);
+    document.getElementById('btnNextRandom').addEventListener('click', startRandomExercise);
+
+    // Settings
+    document.getElementById('volSlider').addEventListener('input', function() { setRefVolume(this.value); });
+    document.getElementById('a4Select').addEventListener('change', function() { setA4(this.value); });
+    document.getElementById('confSelect').addEventListener('change', function() { setConfThreshold(this.value); });
+    document.getElementById('btnCalibrate').addEventListener('click', calibrateMic);
+    document.getElementById('btnEndSession').addEventListener('click', endSession);
+}
+
+// ====================================================================
+// ON LOAD
+// ====================================================================
+window.addEventListener('DOMContentLoaded', () => {
+    attachEventListeners();
+    initDB().then(() => {
+        runMicDiagnostics();
+    });
+});
+
+// Visibility change: suspend/resume AudioContext
 document.addEventListener('visibilitychange', async () => {
     if (!State.audioCtx) return;
 
@@ -1802,7 +2027,7 @@ document.addEventListener('visibilitychange', async () => {
             }
         }
     } catch (e) {
-        console.error('[VISIBILITY AUDIO] exact error:', e.name, e.message, e);
+        console.error('[VISIBILITY AUDIO] error:', e.name, e.message, e);
     }
 
     runMicDiagnostics();
