@@ -671,7 +671,57 @@ function getIntervalName(semis) {
     return INTERVALS.find(i => i.semitones === abs) ? INTERVALS.find(i => i.semitones === abs).name : `(${abs})`;
 }
 
-function playReferenceNote(midi, duration = 1.0, delay = 0, dynamicCurve = null) {
+// Synthesized Piano Sound for References
+function playPianoNote(midi, duration = 0.8, delay = 0) {
+    return new Promise(resolve => {
+        const ctx = State.audioCtx;
+        const now = ctx.currentTime + delay;
+        const fundamental = midiToFreq(midi);
+        
+        const osc1 = ctx.createOscillator();
+        osc1.type = 'triangle';
+        osc1.frequency.value = fundamental;
+        
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = fundamental * 2;
+        
+        const env1 = ctx.createGain();
+        const env2 = ctx.createGain();
+        
+        env1.gain.setValueAtTime(0, now);
+        env1.gain.linearRampToValueAtTime(0.6, now + 0.01); 
+        env1.gain.exponentialRampToValueAtTime(0.001, now + duration); 
+        
+        env2.gain.setValueAtTime(0, now);
+        env2.gain.linearRampToValueAtTime(0.2, now + 0.01);
+        env2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.5);
+        
+        osc1.connect(env1);
+        osc2.connect(env2);
+        env1.connect(State.refGainNode);
+        env2.connect(State.refGainNode);
+        
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration);
+        osc2.stop(now + duration);
+        
+        setTimeout(resolve, duration * 1000 + delay * 1000);
+    });
+}
+
+async function playSequence(notes) {
+    State.isPlayingRef = true;
+    for(let i=0; i<notes.length; i++) {
+        await playPianoNote(notes[i], 0.8);
+        if(i < notes.length - 1) await new Promise(r => setTimeout(r, 200));
+    }
+    State.isPlayingRef = false;
+}
+
+// Pure Sine wave for Dynamic
+function playSineNote(midi, duration = 1.0, delay = 0, dynamicCurve = null) {
     return new Promise(resolve => {
         const ctx = State.audioCtx;
         const osc = ctx.createOscillator();
@@ -698,15 +748,6 @@ function playReferenceNote(midi, duration = 1.0, delay = 0, dynamicCurve = null)
         osc.stop(now + duration);
         setTimeout(resolve, duration * 1000 + delay * 1000);
     });
-}
-
-async function playSequence(notes) {
-    State.isPlayingRef = true;
-    for(let i=0; i<notes.length; i++) {
-        await playReferenceNote(notes[i], 0.8);
-        if(i < notes.length - 1) await new Promise(r => setTimeout(r, 200));
-    }
-    State.isPlayingRef = false;
 }
 
 let tunerCanvasCtx, tunerCanvas, pitchGraphData = new Array(200).fill(-1);
@@ -827,6 +868,50 @@ function analyzePitches(pitches, targetMidi) {
     return { valid: true, meanCents, medCents, stability, score: Math.round(finalScore), octaveShifted };
 }
 
+// Analyze Sequence of Pitches
+function analyzeSequence(pitches, targetSeq) {
+    const totalNotes = targetSeq.length;
+    if (pitches.length < totalNotes * 3) {
+        return { valid: false, reason: 'صدای کافی برای تحلیل کل توالی دریافت نشد. دوباره امتحان کنید.' };
+    }
+    
+    const chunkSize = Math.floor(pitches.length / totalNotes);
+    let correctNotes = 0;
+    let totalCentsError = 0;
+    let octaveShiftedCount = 0;
+    
+    for (let i = 0; i < totalNotes; i++) {
+        const chunk = pitches.slice(i * chunkSize, (i + 1) * chunkSize);
+        if (chunk.length === 0) continue;
+        
+        const freqs = chunk.map(p => p.freq).sort((a, b) => a - b);
+        const medianFreq = freqs[Math.floor(freqs.length / 2)];
+        const userMidi = freqToMidi(medianFreq);
+        const targetMidi = targetSeq[i];
+        
+        if (userMidi % 12 === targetMidi % 12) {
+            correctNotes++;
+            if (userMidi !== targetMidi) octaveShiftedCount++;
+            totalCentsError += Math.abs(getCents(medianFreq, midiToFreq(userMidi)));
+        }
+    }
+    
+    if (correctNotes === 0) {
+        return { valid: false, reason: 'هیچ یک از نت‌های توالی درست خوانده نشده است.' };
+    }
+    
+    const accuracy = (correctNotes / totalNotes) * 100;
+    const avgCents = totalCentsError / correctNotes;
+    const score = Math.round(accuracy * 0.7 + Math.max(0, 100 - avgCents * 2) * 0.3);
+    
+    let msg = `${correctNotes} از ${totalNotes} نت درست خوانده شده است.`;
+    if (octaveShiftedCount > 0) {
+        msg += `<br><span style='color:var(--warning);'>${octaveShiftedCount} نت در اکتاو متفاوت بوده است (بند قراردادی).</span>`;
+    }
+    
+    return { valid: true, score, msg, avgCents: Math.round(avgCents) };
+}
+
 async function startSingleNoteExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('singleNoteResultCard').classList.add('hidden');
@@ -836,7 +921,7 @@ async function startSingleNoteExercise() {
     State.currentExercise = { type: 'single_note', targetMidi };
     State.targetMidi = targetMidi;
     
-    await playReferenceNote(targetMidi);
+    await playPianoNote(targetMidi);
     
     State.exState = 'LISTENING';
     State.detectedPitches = [];
@@ -945,7 +1030,10 @@ async function startRandomExercise() {
     State.detectedPitches = [];
     State.targetMidi = seq[seq.length-1];
     document.getElementById('randomListeningCard').classList.remove('hidden');
-    setTimeout(() => { if (State.exState === 'LISTENING') stopRandomListening(); }, 8000);
+    
+    // Dynamic listen time based on note count (1.5s per note + 1s buffer)
+    let listenTime = count * 1500 + 1000;
+    setTimeout(() => { if (State.exState === 'LISTENING') stopRandomListening(); }, listenTime);
 }
 
 function stopRandomListening() {
@@ -953,13 +1041,19 @@ function stopRandomListening() {
     State.exState = 'ANALYZING';
     document.getElementById('randomListeningCard').classList.add('hidden');
     
-    const a = analyzePitches(State.detectedPitches, State.targetMidi);
+    const a = analyzeSequence(State.detectedPitches, State.currentExercise.sequence);
     const content = document.getElementById('randomResultContent');
     if (!a.valid) {
         content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`;
     } else {
-        content.innerHTML = `<div class="stat-grid"><div class="stat-item"><div class="stat-label">امتیاز نت آخر</div><div class="stat-value">${a.score}%</div></div></div>`;
-        saveAttempt({ timestamp: Date.now(), type: 'random', score: a.score, centsError: a.medCents, valid: true });
+        content.innerHTML = `
+            <div class="stat-grid">
+                <div class="stat-item"><div class="stat-label">امتیاز توالی</div><div class="stat-value">${a.score}%</div></div>
+                <div class="stat-item"><div class="stat-label">میانگین خطا</div><div class="stat-value">${a.avgCents} سنت</div></div>
+            </div>
+            <div class="analysis-text" style="margin-top:15px;">${a.msg}</div>
+        `;
+        saveAttempt({ timestamp: Date.now(), type: 'random', score: a.score, centsError: a.avgCents, valid: true });
     }
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
@@ -986,7 +1080,7 @@ async function startDynamicExercise() {
     State.targetDynamicCurve = curve;
     
     State.exState = 'PLAYING_REF';
-    await playReferenceNote(targetMidi, duration, 0, curve);
+    await playSineNote(targetMidi, duration, 0, curve);
     
     State.exState = 'LISTENING';
     State.detectedVolumes = [];
