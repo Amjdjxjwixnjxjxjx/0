@@ -284,7 +284,6 @@
                 <canvas id="pitchGraph"></canvas>
             </div>
 
-            <!-- Single Note Exercise -->
             <div class="card">
                 <h3>تمرین تک‌نت (دقت فرکانس)</h3>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">یک نت تصادفی پخش می‌شود. سعی کنید دقیق‌ترین فرکانس را بگیرید. سیستم اکتاو را نادیده می‌گیرد (بند قراردادی).</p>
@@ -390,16 +389,19 @@
         <div id="view-dynamic" class="view">
             <div class="card">
                 <h3>تمرین داینامیک (ولوم صدا)</h3>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">یک نت با یک منحنی ولوم تصادفی (موج سینوسی) پخش می‌شود. شما باید همان نت را با همان نوسان صدایی که شنیدید بخوانید.</p>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">
+                    یک نت پخش می‌شود و همزمان یک نمودار قرمز به عنوان "هدف ولوم" روی صفحه رسم می‌شود.
+                    شما باید آن نت را بخوانید و ولوم صدای خود را کم و زیاد کنید تا <b>خط سبز (صدای شما)</b> را دقیقاً روی <b>خط قرمز (هدف)</b> نگه دارید.
+                </p>
                 <button class="btn" style="margin-top:15px;" id="btnStartDynamic">شروع تمرین داینامیک</button>
             </div>
             <div class="card hidden" id="dynamicTargetCard">
-                <span class="label">نت هدف</span>
+                <span class="label">نت هدف برای خواندن</span>
                 <div id="dynTargetNote" style="font-size:1.2rem; font-weight:bold;">--</div>
             </div>
             <div class="card hidden" id="dynamicListeningCard">
-                <div class="status-box pulse">ولوم صدا را دقیقاً مثل مرجع تغییر دهید...</div>
-                <canvas id="dynamicGraph" style="margin-top:15px;"></canvas>
+                <div class="status-box pulse">ولوم صدا را بر اساس نمودار تغییر دهید...</div>
+                <canvas id="dynamicGraph" style="margin-top:15px; height: 200px;"></canvas>
                 <button class="btn btn-danger" style="margin-top:15px;" id="btnStopDynamic">پایان و تحلیل</button>
             </div>
             <div class="card hidden" id="dynamicResultCard">
@@ -419,10 +421,7 @@
             <div class="card">
                 <h3>تحلیل نقاط ضعف فواصل</h3>
                 <div id="weaknessAnalysis" class="analysis-text">در حال تحلیل... نیاز به تمرین بیشتری است.</div>
-            </div>
-            <div class="card">
-                <h3>آمار فواصل</h3>
-                <div style="overflow-x:auto;">
+                <div style="overflow-x:auto; margin-top:15px;">
                     <table class="table" id="intervalStatsTable">
                         <thead><tr><th>فاصله</th><th>جهت</th><th>تعداد</th><th>میانگین</th><th>خطا</th></tr></thead>
                         <tbody id="intervalStatsBody"></tbody>
@@ -430,8 +429,12 @@
                 </div>
             </div>
             <div class="card">
-                <h3>آمار داینامیک و تک‌نت</h3>
-                <div id="generalStats" class="stat-grid"></div>
+                <h3>آمار تک‌نت و رندوم نت</h3>
+                <div id="pitchStats" class="stat-grid"></div>
+            </div>
+            <div class="card">
+                <h3>آمار داینامیک</h3>
+                <div id="dynamicStats" class="stat-grid"></div>
             </div>
         </div>
 
@@ -467,6 +470,11 @@
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">در محیطی که هستید، ۳ ثانیه سکوت کنید تا نویز پس‌زمینه محاسبه شود.</p>
                 <button class="btn btn-secondary" style="margin-top:15px;" id="btnCalibrate">شروع کالیبراسیون</button>
                 <div id="calibStatus" style="text-align:center; margin-top:10px; color:var(--success);"></div>
+            </div>
+            <div class="card">
+                <h3>ذخیره و خروجی داده‌ها</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">با این دکمه می‌توانید تمام تاریخچه تمرین‌های خود را به صورت یک فایل دانلود کنید تا به هوش مصنوعی بدهید یا بایگانی کنید.</p>
+                <button class="btn btn-secondary" style="margin-top:15px;" id="btnExportData">دانلود خروجی داده‌ها (JSON)</button>
             </div>
             <div class="card">
                 <h3>پایان جلسه</h3>
@@ -514,7 +522,8 @@ const State = {
     isListening: false, isPlayingRef: false, currentExercise: null, sessionStartTime: Date.now(), sessionAttempts: [], noiseFloor: 0.002,
     settings: { A4: 440, refVolume: 0.5, confThreshold: 0.75 },
     pitchHistory: [], buffer: new Float32Array(4096), 
-    exState: 'IDLE', detectedPitches: [], detectedVolumes: [], targetMidi: 0, lastInterval: null, lastRandomSeq: [], targetDynamicCurve: []
+    exState: 'IDLE', detectedPitches: [], detectedVolumes: [], targetMidi: 0, lastInterval: null, lastRandomSeq: [], 
+    targetDynamicCurve: [], dynamicStartTime: 0, dynamicDuration: 0
 };
 
 const PERSIAN_NOTES = {
@@ -671,7 +680,7 @@ function getIntervalName(semis) {
     return INTERVALS.find(i => i.semitones === abs) ? INTERVALS.find(i => i.semitones === abs).name : `(${abs})`;
 }
 
-// Synthesized Piano Sound for References
+// Synthesized Piano Sound
 function playPianoNote(midi, duration = 0.8, delay = 0) {
     return new Promise(resolve => {
         const ctx = State.audioCtx;
@@ -720,8 +729,8 @@ async function playSequence(notes) {
     State.isPlayingRef = false;
 }
 
-// Pure Sine wave for Dynamic
-function playSineNote(midi, duration = 1.0, delay = 0, dynamicCurve = null) {
+// Pure Sine wave for Dynamic steady note
+function playSineNote(midi, duration = 1.0, delay = 0) {
     return new Promise(resolve => {
         const ctx = State.audioCtx;
         const osc = ctx.createOscillator();
@@ -731,16 +740,9 @@ function playSineNote(midi, duration = 1.0, delay = 0, dynamicCurve = null) {
         
         const now = ctx.currentTime + delay;
         env.gain.setValueAtTime(0, now);
-        
-        if (dynamicCurve) {
-            for(let i=0; i<dynamicCurve.length; i++) {
-                env.gain.linearRampToValueAtTime(dynamicCurve[i].vol, now + dynamicCurve[i].t);
-            }
-        } else {
-            env.gain.linearRampToValueAtTime(1, now + 0.05);
-            env.gain.linearRampToValueAtTime(1, now + duration - 0.1);
-            env.gain.linearRampToValueAtTime(0, now + duration);
-        }
+        env.gain.linearRampToValueAtTime(0.8, now + 0.05);
+        env.gain.linearRampToValueAtTime(0.8, now + duration - 0.1);
+        env.gain.linearRampToValueAtTime(0, now + duration);
         
         osc.connect(env);
         env.connect(State.refGainNode);
@@ -765,7 +767,6 @@ function startTunerLoop() {
         
         if (State.exState === 'LISTENING') {
             if (State.currentExercise && State.currentExercise.type === 'dynamic') {
-                if (rms > State.noiseFloor) State.detectedVolumes.push({ rms, time: performance.now() });
                 drawDynamicGraph(rms);
             } else if (confidence > State.settings.confThreshold) {
                 State.detectedPitches.push({ freq, time: performance.now() });
@@ -868,7 +869,6 @@ function analyzePitches(pitches, targetMidi) {
     return { valid: true, meanCents, medCents, stability, score: Math.round(finalScore), octaveShifted };
 }
 
-// Analyze Sequence of Pitches
 function analyzeSequence(pitches, targetSeq) {
     const totalNotes = targetSeq.length;
     if (pitches.length < totalNotes * 3) {
@@ -896,22 +896,19 @@ function analyzeSequence(pitches, targetSeq) {
         }
     }
     
-    if (correctNotes === 0) {
-        return { valid: false, reason: 'هیچ یک از نت‌های توالی درست خوانده نشده است.' };
-    }
+    if (correctNotes === 0) return { valid: false, reason: 'هیچ یک از نت‌های توالی درست خوانده نشده است.' };
     
     const accuracy = (correctNotes / totalNotes) * 100;
     const avgCents = totalCentsError / correctNotes;
     const score = Math.round(accuracy * 0.7 + Math.max(0, 100 - avgCents * 2) * 0.3);
     
     let msg = `${correctNotes} از ${totalNotes} نت درست خوانده شده است.`;
-    if (octaveShiftedCount > 0) {
-        msg += `<br><span style='color:var(--warning);'>${octaveShiftedCount} نت در اکتاو متفاوت بوده است (بند قراردادی).</span>`;
-    }
+    if (octaveShiftedCount > 0) msg += `<br><span style='color:var(--warning);'>${octaveShiftedCount} نت در اکتاو متفاوت بوده است (بند قراردادی).</span>`;
     
     return { valid: true, score, msg, avgCents: Math.round(avgCents) };
 }
 
+// --- SINGLE NOTE ---
 async function startSingleNoteExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('singleNoteResultCard').classList.add('hidden');
@@ -947,6 +944,7 @@ function stopSingleNote() {
     document.getElementById('singleNoteResultCard').classList.remove('hidden');
 }
 
+// --- INTERVALS ---
 async function startIntervalExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('intervalResultCard').classList.add('hidden');
@@ -997,6 +995,7 @@ function stopListening() {
     document.getElementById('intervalResultCard').classList.remove('hidden');
 }
 
+// --- RANDOM NOTES ---
 async function startRandomExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('randomResultCard').classList.add('hidden');
@@ -1031,7 +1030,6 @@ async function startRandomExercise() {
     State.targetMidi = seq[seq.length-1];
     document.getElementById('randomListeningCard').classList.remove('hidden');
     
-    // Dynamic listen time based on note count (1.5s per note + 1s buffer)
     let listenTime = count * 1500 + 1000;
     setTimeout(() => { if (State.exState === 'LISTENING') stopRandomListening(); }, listenTime);
 }
@@ -1058,40 +1056,43 @@ function stopRandomListening() {
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
 
+// --- DYNAMIC ---
 async function startDynamicExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('dynamicResultCard').classList.add('hidden');
-    document.getElementById('dynamicListeningCard').classList.add('hidden');
     document.getElementById('dynamicTargetCard').classList.remove('hidden');
+    document.getElementById('dynamicListeningCard').classList.remove('hidden');
     
     const targetMidi = 41 + Math.floor(Math.random() * 25);
     State.currentExercise = { type: 'dynamic', targetMidi };
     State.targetMidi = targetMidi;
     document.getElementById('dynTargetNote').innerText = `${midiToNoteName(targetMidi).persian} ${midiToNoteName(targetMidi).octave}`;
     
-    const duration = 3.0;
-    const points = 30;
+    const duration = 4.0; // 4 seconds
+    const points = 40;
     const curve = [];
     for(let i=0; i<=points; i++) {
-        const t = i / points;
-        const vol = 0.5 + 0.4 * Math.sin(t * Math.PI * 2 * (1 + Math.random())) * (1 - t*0.5);
-        curve.push({ t: t * duration, vol: Math.max(0.1, Math.min(0.9, vol)) });
+        const t = i / points * duration;
+        // Random smooth sine curve between 0.1 and 0.9
+        const vol = 0.5 + 0.4 * Math.sin(t * Math.PI * (0.5 + Math.random() * 1.5) + Math.random() * Math.PI);
+        curve.push({ t, vol: Math.max(0.1, Math.min(0.9, vol)) });
     }
     State.targetDynamicCurve = curve;
-    
-    State.exState = 'PLAYING_REF';
-    await playSineNote(targetMidi, duration, 0, curve);
+    State.dynamicDuration = duration;
     
     State.exState = 'LISTENING';
     State.detectedVolumes = [];
-    document.getElementById('dynamicListeningCard').classList.remove('hidden');
-    setTimeout(() => { if (State.exState === 'LISTENING') stopDynamic(); }, 4000);
+    State.dynamicStartTime = performance.now();
+    
+    // Play a steady reference note while user follows the graph
+    playSineNote(targetMidi, duration, 0);
+    
+    setTimeout(() => { if (State.exState === 'LISTENING') stopDynamic(); }, duration * 1000 + 200);
 }
 
 function stopDynamic() {
     if (State.exState !== 'LISTENING') return;
     State.exState = 'ANALYZING';
-    document.getElementById('dynamicListeningCard').classList.add('hidden');
     
     if (State.detectedVolumes.length < 10) {
         document.getElementById('dynamicResultContent').innerHTML = `<div class="status-box" style="color:var(--accent-2);">صدای کافی دریافت نشد.</div>`;
@@ -1099,20 +1100,27 @@ function stopDynamic() {
         return;
     }
     
-    let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms));
-    if (maxUserRms === 0) maxUserRms = 1;
-    
-    const targetAvg = State.targetDynamicCurve.reduce((a,b) => a+b.vol, 0) / State.targetDynamicCurve.length;
-    const userAvg = State.detectedVolumes.reduce((a,b) => a + (b.rms/maxUserRms), 0) / State.detectedVolumes.length;
-    const error = Math.abs(targetAvg - userAvg);
-    const score = Math.round(Math.max(0, 100 - error * 150));
+    let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
+    let totalError = 0;
+
+    State.detectedVolumes.forEach(uv => {
+        // Find closest target point in time
+        let closestTarget = State.targetDynamicCurve.reduce((prev, curr) => {
+            return (Math.abs(curr.t - uv.t) < Math.abs(prev.t - uv.t) ? curr : prev);
+        });
+        let userVolNormalized = uv.rms / maxUserRms;
+        totalError += Math.abs(closestTarget.vol - userVolNormalized);
+    });
+
+    let avgError = totalError / State.detectedVolumes.length;
+    let score = Math.round(Math.max(0, 100 - avgError * 150));
     
     document.getElementById('dynamicResultContent').innerHTML = `
         <div class="stat-grid">
             <div class="stat-item"><div class="stat-label">امتیاز داینامیک</div><div class="stat-value">${score}%</div></div>
-            <div class="stat-item"><div class="stat-label">میانگین ولوم شما</div><div class="stat-value">${(userAvg*100).toFixed(0)}%</div></div>
+            <div class="stat-item"><div class="stat-label">میانگین خطای ولوم</div><div class="stat-value">${(avgError*100).toFixed(0)}%</div></div>
         </div>
-        <div class="analysis-text" style="margin-top:15px;">ولوم مرجع: ${(targetAvg*100).toFixed(0)}% | ولوم شما: ${(userAvg*100).toFixed(0)}%</div>
+        <div class="analysis-text" style="margin-top:15px;">خط سبز (صدای شما) و خط قرمز (هدف) مقایسه شدند. هرچه خطا کمتر باشد، کنترل داینامیک شما بهتر است.</div>
     `;
     saveAttempt({ timestamp: Date.now(), type: 'dynamic', score: score, valid: true });
     document.getElementById('dynamicResultCard').classList.remove('hidden');
@@ -1126,28 +1134,33 @@ function drawDynamicGraph(rms) {
     const w = c.width, h = c.height;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
     
-    ctx.strokeStyle = 'rgba(255,0,85,0.5)';
-    ctx.lineWidth = 2;
+    // Draw target curve (Red)
+    ctx.strokeStyle = 'rgba(255,0,85,0.8)';
+    ctx.lineWidth = 4;
     ctx.beginPath();
     State.targetDynamicCurve.forEach((p, i) => {
-        let x = (p.t / 3.0) * w;
-        let y = h - (p.vol * h);
+        let x = (p.t / State.dynamicDuration) * w;
+        let y = h - (p.vol * h * 0.9); // 10% margin
         if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
     
+    // Record user volume with timestamp relative to start
+    let t = (performance.now() - State.dynamicStartTime) / 1000;
+    if (rms > State.noiseFloor && t <= State.dynamicDuration) {
+        State.detectedVolumes.push({ rms, t });
+    }
+
+    // Draw user curve (Green)
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
     ctx.strokeStyle = '#00ff88';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    const len = State.detectedVolumes.length;
-    const startIdx = Math.max(0, len - 100);
-    for (let i = startIdx; i < len; i++) {
-        const p = State.detectedVolumes[i];
-        let y = h - (p.rms / maxUserRms) * h;
-        let x = ((i - startIdx) / 100) * w;
-        if (i === startIdx) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
+    State.detectedVolumes.forEach((p, i) => {
+        let x = (p.t / State.dynamicDuration) * w;
+        let y = h - (p.rms / maxUserRms) * h * 0.9;
+        if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
     ctx.stroke();
 }
 
@@ -1182,6 +1195,7 @@ function drawExerciseGraph(freq) {
     ctx.stroke();
 }
 
+// IndexedDB Setup
 let db;
 function initDB() {
     return new Promise((resolve) => {
@@ -1202,6 +1216,24 @@ function saveAttempt(data) {
     if (!db) return;
     const tx = db.transaction('attempts', 'readwrite');
     tx.objectStore('attempts').add(data);
+}
+
+async function exportData() {
+    if (!db) return alert("دیتابیس در دسترس نیست.");
+    const tx = db.transaction(['sessions', 'attempts'], 'readonly');
+    const sessions = await new Promise(res => { const r = tx.objectStore('sessions').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
+    const attempts = await new Promise(res => { const r = tx.objectStore('attempts').getAll(); r.onsuccess = () => res(r.result); r.onerror = () => res([]); });
+    
+    const dataStr = JSON.stringify({ sessions, attempts }, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vocal_trainer_export_${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 function endSession() {
@@ -1252,6 +1284,7 @@ function renderAnalytics(attempts) {
     });
     ctx.stroke();
     
+    // Interval Stats
     const intervals = {};
     attempts.filter(a => a.type === 'interval').forEach(a => {
         const key = `${a.interval}_${a.direction}`;
@@ -1276,14 +1309,22 @@ function renderAnalytics(attempts) {
     document.getElementById('weaknessAnalysis').innerText = weakText;
     document.getElementById('intervalStatsBody').innerHTML = tableHTML;
     
+    // Pitch Stats (Single & Random)
     const singleNotes = attempts.filter(a => a.type === 'single_note');
-    const dynamics = attempts.filter(a => a.type === 'dynamic');
-    const avg = (arr) => arr.length > 0 ? (arr.reduce((a,b) => a + b.score, 0) / arr.length).toFixed(0) + '%' : 'ندارد';
-    document.getElementById('generalStats').innerHTML = `
+    const randomNotes = attempts.filter(a => a.type === 'random');
+    const avg = (arr) => arr.length > 0 ? (arr.reduce((a,b) => a + b.score, 0) / arr.length).toFixed(0) + '%' : 'بدون داده';
+    document.getElementById('pitchStats').innerHTML = `
         <div class="stat-item"><div class="stat-label">تک‌نت (تعداد)</div><div class="stat-value">${singleNotes.length}</div></div>
         <div class="stat-item"><div class="stat-label">میانگین تک‌نت</div><div class="stat-value">${avg(singleNotes)}</div></div>
-        <div class="stat-item"><div class="stat-label">داینامیک (تعداد)</div><div class="stat-value">${dynamics.length}</div></div>
-        <div class="stat-item"><div class="stat-label">میانگین داینامیک</div><div class="stat-value">${avg(dynamics)}</div></div>
+        <div class="stat-item"><div class="stat-label">رندوم نت (تعداد)</div><div class="stat-value">${randomNotes.length}</div></div>
+        <div class="stat-item"><div class="stat-label">میانگین رندوم نت</div><div class="stat-value">${avg(randomNotes)}</div></div>
+    `;
+
+    // Dynamic Stats
+    const dynamics = attempts.filter(a => a.type === 'dynamic');
+    document.getElementById('dynamicStats').innerHTML = `
+        <div class="stat-item"><div class="stat-label">تعداد تمرین داینامیک</div><div class="stat-value">${dynamics.length}</div></div>
+        <div class="stat-item"><div class="stat-label">میانگین دقت داینامیک</div><div class="stat-value">${avg(dynamics)}</div></div>
     `;
 }
 
@@ -1349,6 +1390,7 @@ function attachEventListeners() {
     document.getElementById('confSelect').addEventListener('change', function() { setConfThreshold(this.value); });
     document.getElementById('btnCalibrate').addEventListener('click', calibrateMic);
     document.getElementById('btnEndSession').addEventListener('click', endSession);
+    document.getElementById('btnExportData').addEventListener('click', exportData);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
