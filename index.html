@@ -349,7 +349,11 @@
     <p style="color:var(--accent);">برای دقت بالا در تمرین فواصل، حتماً از هندزفری استفاده کنید تا صدای مرجع وارد میکروفون نشود.</p>
     <p style="font-size:0.8rem; color:var(--text-muted);">صدای شما فقط در همین دستگاه پردازش می‌شود، ضبط یا ارسال نمی‌شود.</p>
     <button class="btn" onclick="initAudio()">اجازه دسترسی به میکروفون و شروع</button>
-    <div id="initError" style="color:var(--accent-2); font-size:0.9rem;"></div>
+    <div id="initError" style="color:var(--accent-2); font-size:0.9rem; white-space:pre-wrap;"></div>
+
+    <div id="micDiagnostics" class="status-box" style="width:100%; max-width:720px; text-align:right; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; direction:ltr; white-space:pre-wrap; overflow:auto; max-height:34vh;"></div>
+
+    <button class="btn btn-secondary" style="max-width:720px;" onclick="runMicDiagnostics()">بررسی وضعیت میکروفون</button>
 </div>
 
 <div id="app">
@@ -621,6 +625,7 @@ const State = {
     micSource: null,
     analyser: null,
     refGainNode: null,
+    tunerLoopStarted: false,
     
     isListening: false,
     isPlayingRef: false,
@@ -687,57 +692,282 @@ const SCALES = {
 // ====================================================================
 async function initAudio() {
     const errEl = document.getElementById('initError');
+    const diagEl = document.getElementById('micDiagnostics');
     errEl.innerText = '';
-    
-    // iOS Safari Check for HTTPS
-    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        errEl.innerText = 'خطا: مرورگرهای موبایل دسترسی به میکروفون را فقط در پروتکل HTTPS (یا هاست محلی) اجازه می‌دهند. لطفاً فایل را روی یک هاست واقعی یا GitHub Pages قرار دهید.';
+
+    // IMPORTANT:
+    // getUserMedia() is called directly from the user's click handler.
+    // Do not put an await before this call: some browser permission flows
+    // are sensitive to the original user-activation context.
+    const diagnostic = {
+        time: new Date().toISOString(),
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        href: window.location.href,
+        hostname: window.location.hostname,
+        isSecureContext: window.isSecureContext,
+        mediaDevicesExists: !!navigator.mediaDevices,
+        getUserMediaExists: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+        userAgent: navigator.userAgent,
+        permissionsAPIExists: !!navigator.permissions,
+        permissionState: 'unknown',
+        topLevel: window.top === window.self
+    };
+
+    try {
+        if (navigator.permissions && navigator.permissions.query) {
+            try {
+                const permission = await navigator.permissions.query({ name: 'microphone' });
+                diagnostic.permissionState = permission.state;
+                permission.onchange = () => runMicDiagnostics();
+            } catch (permissionError) {
+                diagnostic.permissionQueryError =
+                    `${permissionError.name || 'UnknownError'}: ${permissionError.message || String(permissionError)}`;
+            }
+        }
+    } catch (e) {
+        diagnostic.permissionQueryError =
+            `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
+    }
+
+    if (diagEl) diagEl.textContent = formatMicDiagnostics(diagnostic);
+
+    if (!window.isSecureContext ||
+        (window.location.protocol !== 'https:' &&
+         window.location.hostname !== 'localhost' &&
+         window.location.hostname !== '127.0.0.1')) {
+        const msg =
+            'SECURE CONTEXT ERROR\n' +
+            'این صفحه در یک Context امن اجرا نمی‌شود.\n' +
+            `protocol=${window.location.protocol}\n` +
+            `isSecureContext=${window.isSecureContext}\n` +
+            'برای GitHub Pages باید آدرس با https:// شروع شود.';
+        errEl.innerText = msg;
         return;
     }
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        errEl.innerText = 'مرورگر شما از دسترسی به میکروفون پشتیبانی نمی‌کند.';
+    if (!navigator.mediaDevices) {
+        const msg =
+            'MEDIA DEVICES ERROR\n' +
+            'navigator.mediaDevices وجود ندارد.';
+        errEl.innerText = msg;
         return;
+    }
+
+    if (!navigator.mediaDevices.getUserMedia) {
+        const msg =
+            'GETUSERMEDIA ERROR\n' +
+            'navigator.mediaDevices.getUserMedia وجود ندارد.';
+        errEl.innerText = msg;
+        return;
+    }
+
+    // Call getUserMedia BEFORE creating/awaiting AudioContext so the permission
+    // request remains directly associated with this user interaction.
+    let stream;
+    let firstError = null;
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                channelCount: 1
+            },
+            video: false
+        });
+    } catch (e) {
+        firstError = e;
+        console.error('[MIC getUserMedia] exact error:', e);
+        console.error('[MIC getUserMedia] name:', e && e.name);
+        console.error('[MIC getUserMedia] message:', e && e.message);
+        console.error('[MIC getUserMedia] constraint:', e && e.constraint);
+
+        // Some browsers reject optional/advanced audio constraints.
+        // Retry once with the browser's simplest valid microphone request.
+        if (e && (e.name === 'OverconstrainedError' || e.name === 'TypeError')) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: false
+                });
+                firstError = null;
+            } catch (fallbackError) {
+                console.error('[MIC fallback] exact error:', fallbackError);
+                e = fallbackError;
+            }
+        }
+
+        if (!stream) {
+            const exact =
+                `MICROPHONE REQUEST FAILED\n` +
+                `name: ${e && e.name ? e.name : 'UnknownError'}\n` +
+                `message: ${e && e.message ? e.message : String(e)}\n` +
+                `constraint: ${e && e.constraint ? e.constraint : 'none'}\n\n` +
+                `permissionState: ${diagnostic.permissionState}\n` +
+                `isSecureContext: ${window.isSecureContext}\n` +
+                `origin: ${window.location.origin}\n` +
+                `mediaDevices: ${!!navigator.mediaDevices}\n` +
+                `getUserMedia: ${!!navigator.mediaDevices?.getUserMedia}\n\n` +
+                `اگر name برابر NotAllowedError است و پنجره اجازه نمی‌آید، معمولاً مجوز قبلاً Block شده یا Permission Policy/تنظیمات Chrome مانع درخواست شده است.`;
+
+            errEl.innerText = exact;
+            if (diagEl) {
+                diagEl.textContent = formatMicDiagnostics({
+                    ...diagnostic,
+                    lastErrorName: e && e.name ? e.name : 'UnknownError',
+                    lastErrorMessage: e && e.message ? e.message : String(e),
+                    lastErrorConstraint: e && e.constraint ? e.constraint : 'none'
+                });
+            }
+            updateAudioStatus('خطا', 'badge-danger');
+            return;
+        }
     }
 
     try {
-        // Create and resume AudioContext immediately on user interaction
+        State.micStream = stream;
+
+        // Create and resume AudioContext after the microphone permission request.
         State.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (State.audioCtx.state === 'suspended') {
             await State.audioCtx.resume();
         }
-        
-        // Reference audio graph (completely isolated)
+
+        // Reference audio graph (isolated from microphone input)
         State.refGainNode = State.audioCtx.createGain();
         State.refGainNode.gain.value = State.settings.refVolume;
         State.refGainNode.connect(State.audioCtx.destination);
-        
-        // Mic graph
-        State.micStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: false,
-                noiseSuppression: false,
-                autoGainControl: false
-            }
-        });
-        
+
+        // Microphone graph: mic -> analyser only. Never connect to destination.
         State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
         State.analyser = State.audioCtx.createAnalyser();
         State.analyser.fftSize = 2048;
         State.analyser.smoothingTimeConstant = 0;
-        
         State.micSource.connect(State.analyser);
-        
+
+        const track = State.micStream.getAudioTracks()[0];
+        const trackSettings = track ? track.getSettings() : {};
+        const trackLabel = track ? track.label : 'unknown';
+
+        if (diagEl) {
+            diagEl.textContent = formatMicDiagnostics({
+                ...diagnostic,
+                permissionState: 'granted',
+                streamActive: State.micStream.active,
+                audioTrackCount: State.micStream.getAudioTracks().length,
+                trackLabel,
+                trackSettings: JSON.stringify(trackSettings, null, 2),
+                audioContextState: State.audioCtx.state,
+                success: true
+            });
+        }
+
         document.getElementById('welcomeOverlay').classList.add('hidden');
-        document.getElementById('audioStatus').innerText = 'آماده';
-        document.getElementById('audioStatus').className = 'badge badge-success';
-        
-        startTunerLoop();
-        
+        updateAudioStatus('میکروفون فعال', 'badge-success');
+
+        if (!State.tunerLoopStarted) {
+            State.tunerLoopStarted = true;
+            startTunerLoop();
+        }
     } catch (e) {
-        console.error(e);
-        errEl.innerText = 'خطا در دسترسی به میکروفون. دسترسی را در تنظیمات مرورگر بررسی کنید. (خطا: ' + e.name + ')';
+        console.error('[MIC AUDIO INIT] exact error:', e);
+        const exact =
+            `AUDIO INITIALIZATION FAILED\n` +
+            `name: ${e && e.name ? e.name : 'UnknownError'}\n` +
+            `message: ${e && e.message ? e.message : String(e)}\n\n` +
+            `The microphone permission was granted, but the Web Audio graph could not be initialized.`;
+
+        errEl.innerText = exact;
+        updateAudioStatus('خطا', 'badge-danger');
+
+        if (State.micStream) {
+            State.micStream.getTracks().forEach(t => t.stop());
+            State.micStream = null;
+        }
     }
+}
+
+function updateAudioStatus(text, className) {
+    const el = document.getElementById('audioStatus');
+    if (!el) return;
+    el.innerText = text;
+    el.className = `badge ${className}`;
+}
+
+function formatMicDiagnostics(d) {
+    const lines = [
+        `secureContext: ${d.isSecureContext}`,
+        `protocol: ${d.protocol}`,
+        `origin: ${d.origin}`,
+        `hostname: ${d.hostname}`,
+        `topLevel: ${d.topLevel}`,
+        `navigator.mediaDevices: ${d.mediaDevicesExists}`,
+        `navigator.mediaDevices.getUserMedia: ${d.getUserMediaExists}`,
+        `navigator.permissions: ${d.permissionsAPIExists}`,
+        `microphone permission: ${d.permissionState}`,
+        `userAgent: ${d.userAgent}`
+    ];
+
+    if (d.permissionQueryError) lines.push(`permission query error: ${d.permissionQueryError}`);
+    if (d.lastErrorName) lines.push(`EXACT error.name: ${d.lastErrorName}`);
+    if (d.lastErrorMessage) lines.push(`EXACT error.message: ${d.lastErrorMessage}`);
+    if (d.lastErrorConstraint) lines.push(`EXACT error.constraint: ${d.lastErrorConstraint}`);
+    if ('streamActive' in d) lines.push(`stream.active: ${d.streamActive}`);
+    if ('audioTrackCount' in d) lines.push(`audio tracks: ${d.audioTrackCount}`);
+    if (d.trackLabel) lines.push(`track.label: ${d.trackLabel}`);
+    if (d.trackSettings) lines.push(`track.settings: ${d.trackSettings}`);
+    if (d.audioContextState) lines.push(`AudioContext.state: ${d.audioContextState}`);
+    if (d.success) lines.push('RESULT: microphone stream successfully acquired');
+
+    return lines.join('\n');
+}
+
+async function runMicDiagnostics() {
+    const diagEl = document.getElementById('micDiagnostics');
+    if (!diagEl) return;
+
+    const d = {
+        time: new Date().toISOString(),
+        protocol: window.location.protocol,
+        origin: window.location.origin,
+        href: window.location.href,
+        hostname: window.location.hostname,
+        isSecureContext: window.isSecureContext,
+        mediaDevicesExists: !!navigator.mediaDevices,
+        getUserMediaExists: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+        permissionsAPIExists: !!navigator.permissions,
+        topLevel: window.top === window.self,
+        userAgent: navigator.userAgent
+    };
+
+    try {
+        if (navigator.permissions?.query) {
+            const p = await navigator.permissions.query({ name: 'microphone' });
+            d.permissionState = p.state;
+            p.onchange = () => runMicDiagnostics();
+        } else {
+            d.permissionState = 'Permissions API unavailable';
+        }
+    } catch (e) {
+        d.permissionState = 'query failed';
+        d.permissionQueryError = `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
+    }
+
+    if (State.micStream) {
+        d.streamActive = State.micStream.active;
+        d.audioTrackCount = State.micStream.getAudioTracks().length;
+        const track = State.micStream.getAudioTracks()[0];
+        if (track) {
+            d.trackLabel = track.label;
+            d.trackSettings = JSON.stringify(track.getSettings(), null, 2);
+        }
+    }
+
+    if (State.audioCtx) d.audioContextState = State.audioCtx.state;
+
+    diagEl.textContent = formatMicDiagnostics(d);
 }
 
 // ====================================================================
@@ -1555,16 +1785,27 @@ async function calibrateMic() {
 
 window.onload = () => {
     initDB();
+    runMicDiagnostics();
 };
 
-document.addEventListener('visibilitychange', () => {
-    if (State.audioCtx) {
+document.addEventListener('visibilitychange', async () => {
+    if (!State.audioCtx) return;
+
+    try {
         if (document.hidden) {
-            State.audioCtx.suspend();
+            await State.audioCtx.suspend();
         } else {
-            State.audioCtx.resume();
+            await State.audioCtx.resume();
+            if (State.micStream && State.micStream.active && !State.tunerLoopStarted) {
+                State.tunerLoopStarted = true;
+                startTunerLoop();
+            }
         }
+    } catch (e) {
+        console.error('[VISIBILITY AUDIO] exact error:', e.name, e.message, e);
     }
+
+    runMicDiagnostics();
 });
 </script>
 </body>
