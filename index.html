@@ -1,0 +1,1571 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>مربی آواز حرفه‌ای</title>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --card-bg: #1a1d24;
+            --accent: #00d4ff;
+            --accent-2: #ff0055;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --border: #2a2f3a;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        .header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .views-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        .view {
+            display: none;
+            padding: 20px;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .nav-bottom {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 10px 0;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .nav-btn.active {
+            color: var(--accent);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, var(--accent), #0099ff);
+            color: #000;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.1s, opacity 0.2s;
+            font-family: inherit;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--accent-2), #cc0044);
+            color: #fff;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .value-big {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        .meter-container {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-color);
+            border-radius: 6px;
+            position: relative;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .meter-bar {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            background: var(--success);
+            transition: width 0.1s, background 0.2s;
+            border-radius: 6px;
+        }
+
+        .meter-center {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            background: rgba(255,255,255,0.5);
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        canvas {
+            width: 100%;
+            height: 150px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            display: block;
+        }
+
+        select, input {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            font-family: inherit;
+            -webkit-appearance: none;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .status-box {
+            padding: 12px;
+            border-radius: 8px;
+            background: var(--bg-color);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .table th, .table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            color: var(--accent);
+        }
+
+        .analysis-text {
+            line-height: 1.6;
+            color: var(--text-main);
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            border-right: 4px solid var(--accent);
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 212, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .badge-success { background: rgba(0,255,136,0.2); color: var(--success); }
+        .badge-warning { background: rgba(255,170,0,0.2); color: var(--warning); }
+        .badge-danger { background: rgba(255,0,85,0.2); color: var(--accent-2); }
+
+    </style>
+</head>
+<body>
+
+<div id="welcomeOverlay" class="overlay">
+    <h2>مربی آواز حرفه‌ای</h2>
+    <p>به برنامه تمرین اینتونیشن و فواصل خوش آمدید.</p>
+    <p style="color:var(--accent);">برای دقت بالا در تمرین فواصل، حتماً از هندزفری استفاده کنید تا صدای مرجع وارد میکروفون نشود.</p>
+    <p style="font-size:0.8rem; color:var(--text-muted);">صدای شما فقط در همین دستگاه پردازش می‌شود، ضبط یا ارسال نمی‌شود.</p>
+    <button class="btn" onclick="initAudio()">اجازه دسترسی به میکروفون و شروع</button>
+    <div id="initError" style="color:var(--accent-2); font-size:0.9rem;"></div>
+</div>
+
+<div id="app">
+    <header class="header">
+        <h1 id="pageTitle">تیونر</h1>
+        <div id="audioStatus" class="badge badge-danger">میکروفون خاموش</div>
+    </header>
+
+    <div class="views-container">
+        
+        <!-- Tuner View -->
+        <div id="view-tuner" class="view active">
+            <div class="card">
+                <div class="value-big" id="tunerNote">--</div>
+                <div style="text-align:center; color:var(--text-muted); margin-top:5px;" id="tunerOctave">--</div>
+                
+                <div style="margin-top:20px;">
+                    <span class="label">فرکانس (Hz)</span>
+                    <div id="tunerFreq" style="font-size:1.2rem; text-align:center;">0.00</div>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <span class="label">اختلاف (Cents)</span>
+                    <div class="meter-container">
+                        <div class="meter-center"></div>
+                        <div class="meter-bar" id="tunerMeter"></div>
+                    </div>
+                    <div style="text-align:center; font-weight:bold;" id="tunerCents">0</div>
+                </div>
+
+                <div class="stat-grid" style="margin-top:20px;">
+                    <div class="stat-item">
+                        <div class="stat-label">اطمینان (Confidence)</div>
+                        <div class="stat-value" id="tunerConfidence">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">وضعیت</div>
+                        <div class="stat-value" id="tunerStatus" style="font-size:0.9rem;">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <span class="label">نمودار لحظه‌ای پیچ</span>
+                <canvas id="pitchGraph"></canvas>
+            </div>
+        </div>
+
+        <!-- Interval Trainer View -->
+        <div id="view-intervals" class="view">
+            <div class="card">
+                <h3>تمرین فاصله تصادفی</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:10px;">سیستم دو نت تصادفی در محدوده فا ۲ تا فا ۴ پخش می‌کند. شما باید فاصله بین آن‌ها را بخوانید.</p>
+                
+                <div class="row" style="margin-top:15px;">
+                    <button class="btn btn-secondary" style="flex:1;" onclick="playLastInterval()">پخش مجدد مرجع</button>
+                </div>
+                
+                <button class="btn" style="margin-top:15px;" id="btnStartInterval" onclick="startIntervalExercise()">شروع فاصله تصادفی</button>
+            </div>
+
+            <div class="card hidden" id="intervalTargetCard">
+                <div class="row" style="justify-content:space-between; margin-bottom:10px;">
+                    <div class="col">
+                        <span class="label">نت مبدأ</span>
+                        <span id="intStartNote" style="font-size:1.2rem; font-weight:bold;">--</span>
+                    </div>
+                    <div class="col">
+                        <span class="label">نت مقصد</span>
+                        <span id="intTargetNote" style="font-size:1.2rem; font-weight:bold;">--</span>
+                    </div>
+                </div>
+                <div class="row" style="justify-content:space-between;">
+                    <div class="col">
+                        <span class="label">فاصله</span>
+                        <span id="intType" style="font-weight:bold;">--</span>
+                    </div>
+                    <div class="col">
+                        <span class="label">جهت</span>
+                        <span id="intDirection" style="font-weight:bold;">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card hidden" id="intervalListeningCard">
+                <div class="status-box pulse" id="listeningStatus">در حال گوش دادن... بخوانید!</div>
+                <canvas id="intervalGraph" style="margin-top:15px;"></canvas>
+                <button class="btn btn-danger" style="margin-top:15px;" onclick="stopListening()">پایان و تحلیل</button>
+            </div>
+
+            <div class="card hidden" id="intervalResultCard">
+                <h3>نتیجه تحلیل</h3>
+                <div id="intervalResultContent"></div>
+                <button class="btn" style="margin-top:15px;" onclick="startIntervalExercise()">فاصله بعدی</button>
+            </div>
+        </div>
+
+        <!-- Random Notes View -->
+        <div id="view-random" class="view">
+            <div class="card">
+                <h3>تمرین رندوم نت</h3>
+                <div class="col" style="margin-top:15px;">
+                    <div>
+                        <span class="label">گام (Scale)</span>
+                        <select id="scaleSelect">
+                            <option value="C Major">ماژور دو</option>
+                            <option value="G Major">ماژور سل</option>
+                            <option value="D Major">ماژور ر</option>
+                            <option value="A Major">ماژور لا</option>
+                            <option value="F Major">ماژور فا</option>
+                            <option value="A Minor">مینور لا</option>
+                            <option value="E Minor">مینور می</option>
+                            <option value="D Minor">مینور ر</option>
+                            <option value="Chromatic">کروماتیک</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span class="label">تعداد نت‌ها</span>
+                        <select id="noteCountSelect">
+                            <option value="2">۲ نت</option>
+                            <option value="3">۳ نت</option>
+                            <option value="4" selected>۴ نت</option>
+                            <option value="5">۵ نت</option>
+                            <option value="6">۶ نت</option>
+                            <option value="8">۸ نت</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" style="margin-top:15px;" id="btnStartRandom" onclick="startRandomExercise()">تولید و پخش نت‌ها</button>
+            </div>
+
+            <div class="card hidden" id="randomSequenceCard">
+                <span class="label">توالی نت‌ها</span>
+                <div id="randomNotesDisplay" style="display:flex; gap:10px; overflow-x:auto; padding:10px 0;"></div>
+            </div>
+
+            <div class="card hidden" id="randomListeningCard">
+                <div class="status-box pulse" id="randomListenStatus">بخوانید...</div>
+                <canvas id="randomGraph" style="margin-top:15px;"></canvas>
+                <button class="btn btn-danger" style="margin-top:15px;" onclick="stopRandomListening()">پایان و تحلیل</button>
+            </div>
+
+            <div class="card hidden" id="randomResultCard">
+                <h3>نتیجه تحلیل</h3>
+                <div id="randomResultContent"></div>
+                <button class="btn" style="margin-top:15px;" onclick="startRandomExercise()">توالی بعدی</button>
+            </div>
+        </div>
+
+        <!-- History View -->
+        <div id="view-history" class="view">
+            <div class="card">
+                <h3>تاریخچه تمرین‌ها</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">آمار جلسات قبلی شما در دستگاه ذخیره شده است.</p>
+                <div id="historyList" style="margin-top:15px; display:flex; flex-direction:column; gap:10px;"></div>
+            </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="view-analytics" class="view">
+            <div class="card">
+                <h3>تحلیل عملکرد</h3>
+                <span class="label">روند امتیاز کلی</span>
+                <canvas id="chartProgress" style="height:120px;"></canvas>
+            </div>
+            <div class="card">
+                <h3>تحلیل نقاط ضعف</h3>
+                <div id="weaknessAnalysis" class="analysis-text">در حال تحلیل... نیاز به تمرین بیشتری است.</div>
+            </div>
+            <div class="card">
+                <h3>آمار فواصل</h3>
+                <div style="overflow-x:auto;">
+                    <table class="table" id="intervalStatsTable">
+                        <thead>
+                            <tr>
+                                <th>فاصله</th>
+                                <th>جهت</th>
+                                <th>تعداد</th>
+                                <th>میانگین</th>
+                                <th>خطا</th>
+                            </tr>
+                        </thead>
+                        <tbody id="intervalStatsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="view-settings" class="view">
+            <div class="card">
+                <h3>تنظیمات صدا</h3>
+                <div class="col" style="margin-top:15px;">
+                    <div>
+                        <span class="label">صدای مرجع (Volume)</span>
+                        <input type="range" id="volSlider" min="0" max="1" step="0.1" value="0.5" oninput="setRefVolume(this.value)">
+                    </div>
+                    <div>
+                        <span class="label">فرکانس پایه (A4 = ... Hz)</span>
+                        <select id="a4Select" onchange="setA4(this.value)">
+                            <option value="440" selected>۴۴۰ Hz</option>
+                            <option value="432">۴۳۲ Hz</option>
+                            <option value="442">۴۴۲ Hz</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span class="label">حساسیت تشخیص (Confidence Threshold)</span>
+                        <select id="confSelect" onchange="setConfThreshold(this.value)">
+                            <option value="0.85" selected>بالا (سخت‌گیرانه)</option>
+                            <option value="0.75">متوسط</option>
+                            <option value="0.65">پایین (محیط شلوغ)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>کالیبراسیون میکروفون</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">در محیطی که هستید، ۳ ثانیه سکوت کنید تا نویز پس‌زمینه محاسبه شود.</p>
+                <button class="btn btn-secondary" style="margin-top:15px;" onclick="calibrateMic()">شروع کالیبراسیون</button>
+                <div id="calibStatus" style="text-align:center; margin-top:10px; color:var(--success);"></div>
+            </div>
+
+            <div class="card">
+                <h3>پایان جلسه</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">برای ذخیره آمار امروز و دریافت گزارش، جلسه را پایان دهید.</p>
+                <button class="btn btn-danger" style="margin-top:15px;" onclick="endSession()">پایان تمرین امروز</button>
+            </div>
+
+            <div class="card hidden" id="sessionReportCard">
+                <h3>گزارش تمرین امروز</h3>
+                <div id="sessionReportContent"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="nav-bottom">
+        <button class="nav-btn active" data-view="tuner" onclick="navigateTo('tuner', 'تیونر')">
+            <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 0-2 2v10.5a4 4 0 1 0 4 0V4a2 2 0 0 0-2-2z"/></svg>
+            <span>تیونر</span>
+        </button>
+        <button class="nav-btn" data-view="intervals" onclick="navigateTo('intervals', 'تمرین فواصل')">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            <span>فواصل</span>
+        </button>
+        <button class="nav-btn" data-view="random" onclick="navigateTo('random', 'رندوم نت')">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+            <span>رندوم نت</span>
+        </button>
+        <button class="nav-btn" data-view="analytics" onclick="navigateTo('analytics', 'تحلیل عملکرد')">
+            <svg viewBox="0 0 24 24"><path d="M3 17h4v4H3v-4zm6-6h4v10H9V11zm6-6h4v16h-4V5z"/></svg>
+            <span>تحلیل</span>
+        </button>
+        <button class="nav-btn" data-view="settings" onclick="navigateTo('settings', 'تنظیمات')">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span>تنظیمات</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+// ====================================================================
+// STATE & CONFIG
+// ====================================================================
+const State = {
+    audioCtx: null,
+    micStream: null,
+    micSource: null,
+    analyser: null,
+    refGainNode: null,
+    
+    isListening: false,
+    isPlayingRef: false,
+    currentExercise: null,
+    sessionStartTime: Date.now(),
+    sessionAttempts: [],
+    noiseFloor: 0.01,
+    
+    settings: {
+        A4: 440,
+        refVolume: 0.5,
+        confThreshold: 0.85
+    },
+    
+    pitchHistory: [],
+    buffer: new Float32Array(2048),
+    
+    // Exercise state
+    exState: 'IDLE', // IDLE, PLAYING_REF, LISTENING, ANALYZING
+    detectedPitches: [],
+    targetMidi: 0,
+    lastInterval: null
+};
+
+const PERSIAN_NOTES = {
+    'C': 'دو', 'C#': 'دو دیِز', 'Db': 'ر بمل',
+    'D': 'ر', 'D#': 'ر دیِز', 'Eb': 'می بمل',
+    'E': 'می', 'F': 'فا', 'F#': 'فا دیِز', 'Gb': 'سل بمل',
+    'G': 'سل', 'G#': 'سل دیِز', 'Ab': 'لا بمل',
+    'A': 'لا', 'A#': 'لا دیِز', 'Bb': 'سی بمل',
+    'B': 'سی'
+};
+
+const INTERVALS = [
+    { semitones: 0, name: 'یونیسون', en: 'Unison' },
+    { semitones: 1, name: 'نیم پرده کوچک', en: 'Minor 2nd' },
+    { semitones: 2, name: 'یک پرده بزرگ', en: 'Major 2nd' },
+    { semitones: 3, name: 'سوم کوچک', en: 'Minor 3rd' },
+    { semitones: 4, name: 'سوم بزرگ', en: 'Major 3rd' },
+    { semitones: 5, name: 'چهارم درست', en: 'Perfect 4th' },
+    { semitones: 6, name: 'سه‌گانه augmented', en: 'Tritone' },
+    { semitones: 7, name: 'پنجم درست', en: 'Perfect 5th' },
+    { semitones: 8, name: 'ششم کوچک', en: 'Minor 6th' },
+    { semitones: 9, name: 'ششم بزرگ', en: 'Major 6th' },
+    { semitones: 10, name: 'هفتم کوچک', en: 'Minor 7th' },
+    { semitones: 11, name: 'هفتم بزرگ', en: 'Major 7th' },
+    { semitones: 12, name: 'اوکتاو', en: 'Octave' }
+];
+
+const SCALES = {
+    'C Major': [60, 62, 64, 65, 67, 69, 71, 72],
+    'G Major': [67, 69, 71, 72, 74, 76, 77, 79],
+    'D Major': [62, 64, 66, 67, 69, 71, 73, 74],
+    'A Major': [69, 71, 73, 74, 76, 78, 80, 81],
+    'F Major': [65, 67, 69, 70, 72, 74, 76, 77],
+    'A Minor': [69, 71, 72, 74, 76, 77, 79, 81],
+    'E Minor': [64, 66, 67, 69, 71, 72, 74, 76],
+    'D Minor': [62, 64, 65, 67, 69, 70, 72, 74],
+    'Chromatic': [60,61,62,63,64,65,66,67,68,69,70,71,72]
+};
+
+// ====================================================================
+// INITIALIZATION
+// ====================================================================
+async function initAudio() {
+    const errEl = document.getElementById('initError');
+    errEl.innerText = '';
+    
+    // iOS Safari Check for HTTPS
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        errEl.innerText = 'خطا: مرورگرهای موبایل دسترسی به میکروفون را فقط در پروتکل HTTPS (یا هاست محلی) اجازه می‌دهند. لطفاً فایل را روی یک هاست واقعی یا GitHub Pages قرار دهید.';
+        return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        errEl.innerText = 'مرورگر شما از دسترسی به میکروفون پشتیبانی نمی‌کند.';
+        return;
+    }
+
+    try {
+        // Create and resume AudioContext immediately on user interaction
+        State.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (State.audioCtx.state === 'suspended') {
+            await State.audioCtx.resume();
+        }
+        
+        // Reference audio graph (completely isolated)
+        State.refGainNode = State.audioCtx.createGain();
+        State.refGainNode.gain.value = State.settings.refVolume;
+        State.refGainNode.connect(State.audioCtx.destination);
+        
+        // Mic graph
+        State.micStream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
+        
+        State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
+        State.analyser = State.audioCtx.createAnalyser();
+        State.analyser.fftSize = 2048;
+        State.analyser.smoothingTimeConstant = 0;
+        
+        State.micSource.connect(State.analyser);
+        
+        document.getElementById('welcomeOverlay').classList.add('hidden');
+        document.getElementById('audioStatus').innerText = 'آماده';
+        document.getElementById('audioStatus').className = 'badge badge-success';
+        
+        startTunerLoop();
+        
+    } catch (e) {
+        console.error(e);
+        errEl.innerText = 'خطا در دسترسی به میکروفون. دسترسی را در تنظیمات مرورگر بررسی کنید. (خطا: ' + e.name + ')';
+    }
+}
+
+// ====================================================================
+// DSP: PITCH DETECTION (YIN ALGORITHM)
+// ====================================================================
+function detectPitch() {
+    if (!State.analyser) return { freq: -1, confidence: 0, rms: 0 };
+    
+    const buffer = State.buffer;
+    State.analyser.getFloatTimeDomainData(buffer);
+    
+    // RMS for VAD
+    let rms = 0;
+    for(let i=0; i<buffer.length; i++) rms += buffer[i]*buffer[i];
+    rms = Math.sqrt(rms/buffer.length);
+    
+    if (rms < State.noiseFloor) return { freq: -1, confidence: 0, rms };
+    
+    const sampleRate = State.audioCtx.sampleRate;
+    const yinBuffer = new Float32Array(buffer.length / 2);
+    
+    // Step 1: Difference function
+    for (let tau = 0; tau < yinBuffer.length; tau++) {
+        yinBuffer[tau] = 0;
+    }
+    for (let tau = 1; tau < yinBuffer.length; tau++) {
+        let sum = 0;
+        for (let i = 0; i < yinBuffer.length; i++) {
+            const delta = buffer[i] - buffer[i + tau];
+            sum += delta * delta;
+        }
+        yinBuffer[tau] = sum;
+    }
+    
+    // Step 2: Cumulative mean normalized difference function
+    yinBuffer[0] = 1;
+    let runningSum = 0;
+    for (let tau = 1; tau < yinBuffer.length; tau++) {
+        runningSum += yinBuffer[tau];
+        yinBuffer[tau] = yinBuffer[tau] * tau / runningSum;
+    }
+    
+    // Step 3: Absolute threshold
+    const threshold = 1 - State.settings.confThreshold;
+    let tauEstimate = -1;
+    for (let tau = 2; tau < yinBuffer.length; tau++) {
+        if (yinBuffer[tau] < threshold) {
+            while (tau + 1 < yinBuffer.length && yinBuffer[tau + 1] < yinBuffer[tau]) {
+                tau++;
+            }
+            tauEstimate = tau;
+            break;
+        }
+    }
+    
+    if (tauEstimate === -1) return { freq: -1, confidence: 0, rms };
+    
+    // Step 4: Parabolic interpolation
+    let betterTau;
+    let x0 = tauEstimate > 0 ? tauEstimate - 1 : tauEstimate;
+    let x2 = tauEstimate + 1 < yinBuffer.length ? tauEstimate + 1 : tauEstimate;
+    
+    if (x0 === tauEstimate) {
+        betterTau = yinBuffer[tauEstimate] <= yinBuffer[x2] ? tauEstimate : x2;
+    } else if (x2 === tauEstimate) {
+        betterTau = yinBuffer[tauEstimate] <= yinBuffer[x0] ? tauEstimate : x0;
+    } else {
+        let s0 = yinBuffer[x0];
+        let s1 = yinBuffer[tauEstimate];
+        let s2 = yinBuffer[x2];
+        let shift = (s2 - s0) / (2 * (2 * s1 - s2 - s0));
+        betterTau = tauEstimate + shift;
+    }
+    
+    const freq = sampleRate / betterTau;
+    const confidence = 1 - yinBuffer[tauEstimate];
+    
+    // Filter unreasonable vocal ranges
+    if (freq < 60 || freq > 1000) return { freq: -1, confidence: 0, rms };
+    
+    return { freq, confidence, rms };
+}
+
+// ====================================================================
+// MUSIC THEORY MATH
+// ====================================================================
+function freqToMidi(f) {
+    return Math.round(69 + 12 * Math.log2(f / State.settings.A4));
+}
+
+function midiToFreq(m) {
+    return State.settings.A4 * Math.pow(2, (m - 69) / 12);
+}
+
+function getCents(f1, f2) {
+    return 1200 * Math.log2(f1 / f2);
+}
+
+function midiToNoteName(m) {
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octave = Math.floor(m / 12) - 1;
+    const note = notes[m % 12];
+    return { persian: PERSIAN_NOTES[note], octave: octave, en: note };
+}
+
+function getIntervalName(semitones) {
+    const absSem = Math.abs(semitones);
+    const val = INTERVALS.find(i => i.semitones === absSem);
+    return val ? val.name : `Compound (${absSem})`;
+}
+
+// ====================================================================
+// AUDIO PLAYBACK (REFERENCE)
+// ====================================================================
+function playReferenceNote(midi, duration = 1.0, delay = 0) {
+    return new Promise(resolve => {
+        const ctx = State.audioCtx;
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.value = midiToFreq(midi);
+        
+        const now = ctx.currentTime + delay;
+        env.gain.setValueAtTime(0, now);
+        env.gain.linearRampToValueAtTime(1, now + 0.05);
+        env.gain.linearRampToValueAtTime(1, now + duration - 0.1);
+        env.gain.linearRampToValueAtTime(0, now + duration);
+        
+        osc.connect(env);
+        env.connect(State.refGainNode);
+        
+        osc.start(now);
+        osc.stop(now + duration);
+        
+        setTimeout(resolve, duration * 1000 + delay * 1000);
+    });
+}
+
+async function playSequence(notes) {
+    State.isPlayingRef = true;
+    for(let i=0; i<notes.length; i++) {
+        await playReferenceNote(notes[i], 0.8);
+        if(i < notes.length - 1) await new Promise(r => setTimeout(r, 200));
+    }
+    State.isPlayingRef = false;
+}
+
+async function playLastInterval() {
+    if (State.lastInterval && !State.isPlayingRef) {
+        await playSequence([State.lastInterval.startMidi, State.lastInterval.endMidi]);
+    }
+}
+
+// ====================================================================
+// REAL-TIME TUNER LOOP
+// ====================================================================
+let tunerCanvasCtx, tunerCanvas;
+let pitchGraphData = new Array(200).fill(-1);
+
+function startTunerLoop() {
+    tunerCanvas = document.getElementById('pitchGraph');
+    tunerCanvasCtx = tunerCanvas.getContext('2d');
+    
+    function loop() {
+        const { freq, confidence, rms } = detectPitch();
+        updateTunerUI(freq, confidence);
+        drawPitchGraph(freq, confidence);
+        
+        // Handle active exercise recording
+        if (State.exState === 'LISTENING') {
+            if (confidence > State.settings.confThreshold) {
+                State.detectedPitches.push({ freq, time: performance.now() });
+                drawExerciseGraph(freq);
+            }
+        }
+        
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+function updateTunerUI(freq, confidence) {
+    const noteEl = document.getElementById('tunerNote');
+    const octEl = document.getElementById('tunerOctave');
+    const freqEl = document.getElementById('tunerFreq');
+    const centsEl = document.getElementById('tunerCents');
+    const meterEl = document.getElementById('tunerMeter');
+    const confEl = document.getElementById('tunerConfidence');
+    const statEl = document.getElementById('tunerStatus');
+    
+    confEl.innerText = `${Math.round(confidence * 100)}%`;
+    
+    if (freq < 0 || confidence < State.settings.confThreshold) {
+        noteEl.innerText = '--';
+        octEl.innerText = 'صدای قابل اعتماد دریافت نشد';
+        freqEl.innerText = '0.00';
+        centsEl.innerText = '0';
+        meterEl.style.width = '0%';
+        statEl.innerText = 'سکوت / نویز';
+        statEl.style.color = 'var(--text-muted)';
+        return;
+    }
+    
+    const midi = freqToMidi(freq);
+    const noteInfo = midiToNoteName(midi);
+    const targetFreq = midiToFreq(midi);
+    const cents = getCents(freq, targetFreq);
+    
+    noteEl.innerText = noteInfo.persian;
+    octEl.innerText = `اکتاو ${noteInfo.octave}`;
+    freqEl.innerText = freq.toFixed(2);
+    centsEl.innerText = cents > 0 ? `+${cents.toFixed(0)}` : cents.toFixed(0);
+    
+    const meterWidth = Math.min(50, Math.abs(cents) / 50 * 50);
+    meterEl.style.width = `${meterWidth}%`;
+    if (cents < 0) {
+        meterEl.style.left = `${50 - meterWidth}%`;
+    } else {
+        meterEl.style.left = `50%`;
+    }
+    
+    if (Math.abs(cents) < 5) {
+        statEl.innerText = 'دقیق';
+        statEl.style.color = 'var(--success)';
+        meterEl.style.background = 'var(--success)';
+    } else if (cents < 0) {
+        statEl.innerText = 'کمی زیر نت';
+        statEl.style.color = 'var(--warning)';
+        meterEl.style.background = 'var(--warning)';
+    } else {
+        statEl.innerText = 'کمی بالاتر از نت';
+        statEl.style.color = 'var(--accent-2)';
+        meterEl.style.background = 'var(--accent-2)';
+    }
+}
+
+function drawPitchGraph(freq, confidence) {
+    const ctx = tunerCanvasCtx;
+    const w = tunerCanvas.width;
+    const h = tunerCanvas.height;
+    
+    pitchGraphData.push(freq > 0 && confidence > State.settings.confThreshold ? freq : -1);
+    pitchGraphData.shift();
+    
+    ctx.fillStyle = '#0f1115';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Grid
+    ctx.strokeStyle = '#2a2f3a';
+    ctx.lineWidth = 1;
+    for(let i=0; i<5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, h * i / 4);
+        ctx.lineTo(w, h * i / 4);
+        ctx.stroke();
+    }
+    
+    // Pitch curve
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    
+    for(let i=0; i<pitchGraphData.length; i++) {
+        if(pitchGraphData[i] > 0) {
+            let y = h - ((Math.log2(pitchGraphData[i]) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
+            y = Math.max(0, Math.min(h, y));
+            
+            if(!started) {
+                ctx.moveTo(i * (w / pitchGraphData.length), y);
+                started = true;
+            } else {
+                ctx.lineTo(i * (w / pitchGraphData.length), y);
+            }
+        } else {
+            started = false;
+        }
+    }
+    ctx.stroke();
+}
+
+// ====================================================================
+// INTERVAL TRAINER LOGIC
+// ====================================================================
+async function startIntervalExercise() {
+    if (!State.audioCtx) return;
+    if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
+    
+    document.getElementById('intervalResultCard').classList.add('hidden');
+    document.getElementById('intervalListeningCard').classList.add('hidden');
+    document.getElementById('intervalTargetCard').classList.remove('hidden');
+    
+    // Generate random interval
+    // Range F2(41) to F4(65)
+    const startMidi = 41 + Math.floor(Math.random() * 13);
+    const possibleIntervals = [2, 3, 4, 5, 7, 9, 12];
+    const intervalSemis = possibleIntervals[Math.floor(Math.random() * possibleIntervals.length)];
+    
+    let endMidi;
+    let direction;
+    
+    if (Math.random() > 0.5 && startMidi - intervalSemis >= 41) {
+        endMidi = startMidi - intervalSemis;
+        direction = 'نزولی';
+    } else if (startMidi + intervalSemis <= 65) {
+        endMidi = startMidi + intervalSemis;
+        direction = 'صعودی';
+    } else {
+        endMidi = startMidi - intervalSemis;
+        direction = 'نزولی';
+    }
+    
+    State.currentExercise = {
+        type: 'interval',
+        startMidi, 
+        endMidi, 
+        interval: endMidi - startMidi,
+        direction
+    };
+    State.lastInterval = State.currentExercise;
+    
+    const startNote = midiToNoteName(startMidi);
+    const endNote = midiToNoteName(endMidi);
+    
+    document.getElementById('intStartNote').innerText = `${startNote.persian} ${startNote.octave}`;
+    document.getElementById('intTargetNote').innerText = `${endNote.persian} ${endNote.octave}`;
+    document.getElementById('intType').innerText = getIntervalName(endMidi - startMidi);
+    document.getElementById('intDirection').innerText = direction;
+    
+    State.exState = 'PLAYING_REF';
+    await playSequence([startMidi, endMidi]);
+    
+    State.exState = 'LISTENING';
+    State.detectedPitches = [];
+    State.targetMidi = endMidi;
+    
+    document.getElementById('intervalListeningCard').classList.remove('hidden');
+    
+    setTimeout(() => {
+        if (State.exState === 'LISTENING') stopListening();
+    }, 6000);
+}
+
+function stopListening() {
+    if (State.exState !== 'LISTENING') return;
+    State.exState = 'ANALYZING';
+    
+    document.getElementById('intervalListeningCard').classList.add('hidden');
+    
+    const analysis = analyzePitches(State.detectedPitches, State.targetMidi);
+    displayIntervalResult(analysis);
+}
+
+function analyzePitches(pitches, targetMidi) {
+    if (pitches.length < 10) {
+        return { valid: false, reason: 'صدای قابل اعتماد برای امتیازدهی دریافت نشد. دوباره امتحان کن.' };
+    }
+    
+    const targetFreq = midiToFreq(targetMidi);
+    const centsData = pitches.map(p => getCents(p.freq, targetFreq));
+    
+    const median = arr => {
+        const s = [...arr].sort((a,b) => a-b);
+        return s[Math.floor(s.length/2)];
+    };
+    
+    const medCents = median(centsData);
+    const filteredCents = centsData.filter(c => Math.abs(c - medCents) < 100);
+    
+    if (filteredCents.length < 5) {
+        return { valid: false, reason: 'نت تشخیص داده شده بسیار نوسان داشت یا خارج از محدوده بود.' };
+    }
+    
+    const meanCents = filteredCents.reduce((a,b) => a+b, 0) / filteredCents.length;
+    
+    const variance = filteredCents.reduce((a,b) => a + Math.pow(b - meanCents, 2), 0) / filteredCents.length;
+    const stdDev = Math.sqrt(variance);
+    const stability = Math.max(0, 100 - stdDev * 2);
+    
+    const third = Math.floor(filteredCents.length / 3);
+    const startDrift = filteredCents.slice(0, third).reduce((a,b)=>a+b,0)/third;
+    const endDrift = filteredCents.slice(-third).reduce((a,b)=>a+b,0)/third;
+    const drift = endDrift - startDrift;
+    
+    const accuracyScore = Math.max(0, 100 - Math.abs(medCents) * 2);
+    const finalScore = (accuracyScore * 0.5) + (stability * 0.2) + (85 * 0.15) + (stability * 0.15);
+    
+    return {
+        valid: true,
+        meanCents, 
+        medCents, 
+        stability, 
+        drift,
+        score: Math.round(finalScore),
+        count: filteredCents.length
+    };
+}
+
+function displayIntervalResult(a) {
+    const card = document.getElementById('intervalResultCard');
+    const content = document.getElementById('intervalResultContent');
+    card.classList.remove('hidden');
+    
+    if (!a.valid) {
+        content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${a.reason}</div>`;
+        return;
+    }
+    
+    let analysisText = '';
+    if (Math.abs(a.medCents) < 5) analysisText += 'مرکز پیچ بسیار نزدیک به نت هدف بود. ';
+    else if (a.medCents < 0) analysisText += `نت حدود ${Math.abs(a.medCents).toFixed(0)} سنت پایین‌تر (Flat) خوانده شد. `;
+    else analysisText += `نت حدود ${a.medCents.toFixed(0)} سنت بالاتر (Sharp) خوانده شد. `;
+    
+    if (Math.abs(a.drift) > 15) {
+        if (a.drift > 0) analysisText += `در انتهای کشش حدود ${a.drift.toFixed(0)} سنت بالاتر رفت.`;
+        else analysisText += `در انتهای کشش حدود ${Math.abs(a.drift).toFixed(0)} سنت پایین‌تر رفت.`;
+    }
+    
+    let badgeClass = a.score > 85 ? 'badge-success' : (a.score > 70 ? 'badge-warning' : 'badge-danger');
+    let rating = a.score > 95 ? 'عالی' : a.score > 85 ? 'بسیار خوب' : a.score > 75 ? 'خوب' : a.score > 60 ? 'متوسط' : 'ضعیف';
+    
+    content.innerHTML = `
+        <div style="text-align:center; margin:15px 0;">
+            <span class="badge ${badgeClass}" style="font-size:1.5rem; padding:10px 20px;">${a.score}%</span>
+            <div style="color:var(--text-muted); margin-top:5px;">${rating}</div>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-label">میانگین خطا</div>
+                <div class="stat-value">${a.meanCents > 0 ? '+' : ''}${a.meanCents.toFixed(1)}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Median</div>
+                <div class="stat-value">${a.medCents > 0 ? '+' : ''}${a.medCents.toFixed(1)}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">پایداری</div>
+                <div class="stat-value">${a.stability.toFixed(0)}%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Drift</div>
+                <div class="stat-value">${a.drift > 0 ? '+' : ''}${a.drift.toFixed(0)}</div>
+            </div>
+        </div>
+        <div class="analysis-text" style="margin-top:15px;">${analysisText}</div>
+    `;
+    
+    saveAttempt({
+        timestamp: Date.now(),
+        type: 'interval',
+        targetMidi: State.currentExercise.endMidi,
+        interval: State.currentExercise.interval,
+        direction: State.currentExercise.direction,
+        score: a.score,
+        centsError: a.medCents,
+        valid: true
+    });
+}
+
+// ====================================================================
+// RANDOM NOTES LOGIC
+// ====================================================================
+async function startRandomExercise() {
+    if (!State.audioCtx) return;
+    if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
+    
+    document.getElementById('randomResultCard').classList.add('hidden');
+    document.getElementById('randomListeningCard').classList.add('hidden');
+    document.getElementById('randomSequenceCard').classList.remove('hidden');
+    
+    const scale = document.getElementById('scaleSelect').value;
+    const count = parseInt(document.getElementById('noteCountSelect').value);
+    const scaleNotes = SCALES[scale];
+    
+    let seq = [];
+    for(let i=0; i<count; i++) {
+        seq.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+    }
+    
+    State.currentExercise = { type: 'random', sequence: seq };
+    
+    const disp = document.getElementById('randomNotesDisplay');
+    disp.innerHTML = '';
+    seq.forEach(m => {
+        const n = midiToNoteName(m);
+        const div = document.createElement('div');
+        div.style.cssText = 'background:var(--bg-color); padding:10px 15px; border-radius:8px; text-align:center; min-width:60px;';
+        div.innerHTML = `<div style="font-weight:bold;">${n.persian}</div><div style="font-size:0.8rem; color:var(--text-muted);">${n.octave}</div>`;
+        disp.appendChild(div);
+    });
+    
+    State.exState = 'PLAYING_REF';
+    await playSequence(seq);
+    
+    State.exState = 'LISTENING';
+    State.detectedPitches = [];
+    State.targetMidi = seq[seq.length-1];
+    
+    document.getElementById('randomListeningCard').classList.remove('hidden');
+    setTimeout(() => { if (State.exState === 'LISTENING') stopRandomListening(); }, 8000);
+}
+
+function stopRandomListening() {
+    if (State.exState !== 'LISTENING') return;
+    State.exState = 'ANALYZING';
+    document.getElementById('randomListeningCard').classList.add('hidden');
+    
+    const analysis = analyzePitches(State.detectedPitches, State.currentExercise.sequence[State.currentExercise.sequence.length-1]);
+    
+    const content = document.getElementById('randomResultContent');
+    if (!analysis.valid) {
+        content.innerHTML = `<div class="status-box" style="color:var(--accent-2);">${analysis.reason}</div>`;
+    } else {
+        content.innerHTML = `
+            <div style="text-align:center; margin:15px 0;">
+                <span class="badge ${analysis.score > 85 ? 'badge-success' : 'badge-warning'}" style="font-size:1.5rem; padding:10px 20px;">${analysis.score}%</span>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-item"><div class="stat-label">میانگین خطای نت آخر</div><div class="stat-value">${analysis.medCents.toFixed(1)}</div></div>
+                <div class="stat-item"><div class="stat-label">پایداری</div><div class="stat-value">${analysis.stability.toFixed(0)}%</div></div>
+            </div>
+        `;
+        saveAttempt({
+            timestamp: Date.now(),
+            type: 'random',
+            score: analysis.score,
+            centsError: analysis.medCents,
+            valid: true
+        });
+    }
+    document.getElementById('randomResultCard').classList.remove('hidden');
+}
+
+// ====================================================================
+// EXERCISE GRAPH
+// ====================================================================
+let exCanvasCtx, exCanvas;
+function drawExerciseGraph(freq) {
+    const c = document.getElementById('intervalGraph') || document.getElementById('randomGraph');
+    if (!c) return;
+    if (!exCanvasCtx || exCanvas !== c) {
+        exCanvasCtx = c.getContext('2d');
+        exCanvas = c;
+    }
+    
+    const w = c.width;
+    const h = c.height;
+    
+    exCanvasCtx.fillStyle = '#0f1115';
+    exCanvasCtx.fillRect(0, 0, w, h);
+    
+    const targetFreq = midiToFreq(State.targetMidi);
+    let targetY = h - ((Math.log2(targetFreq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
+    targetY = Math.max(0, Math.min(h, targetY));
+    
+    exCanvasCtx.strokeStyle = 'rgba(255,0,85,0.5)';
+    exCanvasCtx.lineWidth = 2;
+    exCanvasCtx.setLineDash([5, 5]);
+    exCanvasCtx.beginPath();
+    exCanvasCtx.moveTo(0, targetY);
+    exCanvasCtx.lineTo(w, targetY);
+    exCanvasCtx.stroke();
+    exCanvasCtx.setLineDash([]);
+    
+    const len = State.detectedPitches.length;
+    const xStep = w / 100;
+    
+    exCanvasCtx.strokeStyle = '#00ff88';
+    exCanvasCtx.lineWidth = 3;
+    exCanvasCtx.beginPath();
+    
+    const startIdx = Math.max(0, len - 100);
+    for (let i = startIdx; i < len; i++) {
+        const p = State.detectedPitches[i];
+        let y = h - ((Math.log2(p.freq) - Math.log2(50)) / (Math.log2(500) - Math.log2(50))) * h;
+        y = Math.max(0, Math.min(h, y));
+        let x = (i - startIdx) * xStep;
+        
+        if (i === startIdx) exCanvasCtx.moveTo(x, y);
+        else exCanvasCtx.lineTo(x, y);
+    }
+    exCanvasCtx.stroke();
+}
+
+// ====================================================================
+// INDEXEDDB PERSISTENCE
+// ====================================================================
+let db;
+function initDB() {
+    return new Promise((resolve) => {
+        if (!window.indexedDB) {
+            resolve();
+            return;
+        }
+        const req = indexedDB.open('VocalTrainerDB', 1);
+        req.onupgradeneeded = e => {
+            const d = e.target.result;
+            if (!d.objectStoreNames.contains('attempts')) d.createObjectStore('attempts', { keyPath: 'id', autoIncrement: true });
+            if (!d.objectStoreNames.contains('sessions')) d.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
+        };
+        req.onsuccess = e => { db = e.target.result; resolve(); };
+        req.onerror = () => resolve();
+    });
+}
+
+function saveAttempt(data) {
+    State.sessionAttempts.push(data);
+    if (!db) return;
+    const tx = db.transaction('attempts', 'readwrite');
+    tx.objectStore('attempts').add(data);
+}
+
+function endSession() {
+    if (State.sessionAttempts.length === 0) {
+        document.getElementById('sessionReportContent').innerHTML = '<div class="status-box">هیچ تمرینی در این جلسه انجام نشده است.</div>';
+        document.getElementById('sessionReportCard').classList.remove('hidden');
+        return;
+    }
+    
+    const valid = State.sessionAttempts.filter(a => a.valid);
+    const overall = valid.reduce((a,b) => a + b.score, 0) / valid.length;
+    const avgErr = valid.reduce((a,b) => a + Math.abs(b.centsError), 0) / valid.length;
+    
+    const duration = Math.round((Date.now() - State.sessionStartTime) / 60000);
+    
+    let report = `
+        <div class="stat-grid">
+            <div class="stat-item"><div class="stat-label">مدت تمرین</div><div class="stat-value">${duration} دقیقه</div></div>
+            <div class="stat-item"><div class="stat-label">تعداد تمرین</div><div class="stat-value">${State.sessionAttempts.length}</div></div>
+            <div class="stat-item"><div class="stat-label">تمرین معتبر</div><div class="stat-value">${valid.length}</div></div>
+            <div class="stat-item"><div class="stat-label">امتیاز کلی</div><div class="stat-value">${overall.toFixed(0)}%</div></div>
+            <div class="stat-item"><div class="stat-label">میانگین خطا</div><div class="stat-value">${avgErr.toFixed(0)} cents</div></div>
+        </div>
+    `;
+    
+    document.getElementById('sessionReportContent').innerHTML = report;
+    document.getElementById('sessionReportCard').classList.remove('hidden');
+    
+    if (db) {
+        const tx = db.transaction('sessions', 'readwrite');
+        tx.objectStore('sessions').add({
+            date: new Date().toLocaleDateString('fa-IR'),
+            timestamp: Date.now(),
+            score: overall,
+            count: valid.length
+        });
+    }
+    
+    State.sessionAttempts = [];
+    State.sessionStartTime = Date.now();
+    
+    loadHistory();
+}
+
+// ====================================================================
+// HISTORY & ANALYTICS
+// ====================================================================
+async function loadHistory() {
+    if (!db) {
+        document.getElementById('historyList').innerHTML = '<div class="status-box">دیتابیس در این مرورگر در دسترس نیست.</div>';
+        return;
+    }
+    const tx = db.transaction(['sessions', 'attempts'], 'readonly');
+    
+    const sessions = await new Promise(res => {
+        const r = tx.objectStore('sessions').getAll();
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res([]);
+    });
+    
+    const histList = document.getElementById('historyList');
+    histList.innerHTML = '';
+    if (sessions.length === 0) {
+        histList.innerHTML = '<div class="status-box">هنوز جلسه‌ای ثبت نشده است.</div>';
+    } else {
+        sessions.slice(-10).reverse().forEach(s => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display:flex; justify-content:space-between; padding:15px; background:var(--bg-color); border-radius:8px;';
+            div.innerHTML = `
+                <span>${s.date}</span>
+                <span style="color:var(--accent); font-weight:bold;">امتیاز: ${s.score.toFixed(0)}%</span>
+            `;
+            histList.appendChild(div);
+        });
+    }
+    
+    const attempts = await new Promise(res => {
+        const r = tx.objectStore('attempts').getAll();
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => res([]);
+    });
+    
+    renderAnalytics(attempts);
+}
+
+function renderAnalytics(attempts) {
+    const c = document.getElementById('chartProgress');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0f1115';
+    ctx.fillRect(0,0,c.width,c.height);
+    
+    if (attempts.length < 2) {
+        ctx.fillStyle = '#8b9bb4';
+        ctx.textAlign = 'center';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('برای نمایش نمودار به تمرین بیشتری نیاز است', c.width/2, c.height/2);
+        document.getElementById('weaknessAnalysis').innerText = 'برای تحلیل نقاط ضعف به تمرین بیشتری نیاز است.';
+        return;
+    }
+    
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const stepX = c.width / (attempts.length - 1);
+    attempts.forEach((a, i) => {
+        let x = i * stepX;
+        let y = c.height - (a.score / 100 * c.height);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    
+    const intervals = {};
+    attempts.filter(a => a.type === 'interval').forEach(a => {
+        const key = `${a.interval}_${a.direction}`;
+        if (!intervals[key]) intervals[key] = { count: 0, totalScore: 0, totalCents: 0 };
+        intervals[key].count++;
+        intervals[key].totalScore += a.score;
+        intervals[key].totalCents += a.centsError;
+    });
+    
+    let weakText = 'برای تحلیل دقیق‌تر فواصل به تمرین بیشتری نیاز است.';
+    let tableHTML = '';
+    
+    const keys = Object.keys(intervals);
+    if (keys.length > 0) {
+        let weakest = null;
+        let weakestScore = 100;
+        
+        keys.forEach(k => {
+            const data = intervals[k];
+            const avgScore = data.totalScore / data.count;
+            const avgCents = data.totalCents / data.count;
+            const [semis, dir] = k.split('_');
+            
+            tableHTML += `<tr>
+                <td>${getIntervalName(parseInt(semis))}</td>
+                <td>${dir}</td>
+                <td>${data.count}</td>
+                <td>${avgScore.toFixed(0)}%</td>
+                <td>${avgCents > 0 ? '+' : ''}${avgCents.toFixed(0)}</td>
+            </tr>`;
+            
+            if (avgScore < weakestScore) {
+                weakestScore = avgScore;
+                weakest = { name: getIntervalName(parseInt(semis)), dir, avgCents };
+            }
+        });
+        
+        if (weakest) {
+            let bias = weakest.avgCents > 0 ? 'بالاتر (Sharp)' : 'پایین‌تر (Flat)';
+            weakText = `بیشترین مشکل فعلی شما در فاصله ${weakest.name} ${weakest.dir} است. در این فاصله معمولاً نت را ${bias} می‌خوانید.`;
+        }
+    }
+    
+    document.getElementById('weaknessAnalysis').innerText = weakText;
+    document.getElementById('intervalStatsBody').innerHTML = tableHTML;
+}
+
+// ====================================================================
+// NAVIGATION & SETTINGS
+// ====================================================================
+function navigateTo(viewId, title) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${viewId}`).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.nav-btn[data-view="${viewId}"]`).classList.add('active');
+    document.getElementById('pageTitle').innerText = title;
+    
+    if (viewId === 'history' || viewId === 'analytics') loadHistory();
+}
+
+function setRefVolume(v) {
+    State.settings.refVolume = parseFloat(v);
+    if (State.refGainNode) State.refGainNode.gain.value = State.settings.refVolume;
+}
+
+function setA4(v) {
+    State.settings.A4 = parseInt(v);
+}
+
+function setConfThreshold(v) {
+    State.settings.confThreshold = parseFloat(v);
+}
+
+async function calibrateMic() {
+    const statusEl = document.getElementById('calibStatus');
+    statusEl.innerText = 'در حال کالیبراسیون...';
+    statusEl.style.color = 'var(--warning)';
+    
+    let maxRms = 0;
+    const start = Date.now();
+    
+    const interval = setInterval(() => {
+        const { rms } = detectPitch();
+        if (rms > maxRms) maxRms = rms;
+        if (Date.now() - start > 2000) {
+            clearInterval(interval);
+            State.noiseFloor = maxRms * 1.5;
+            statusEl.innerText = `کالیبراسیون انجام شد. نویز پس‌زمینه: ${State.noiseFloor.toFixed(3)}`;
+            statusEl.style.color = 'var(--success)';
+        }
+    }, 50);
+}
+
+window.onload = () => {
+    initDB();
+};
+
+document.addEventListener('visibilitychange', () => {
+    if (State.audioCtx) {
+        if (document.hidden) {
+            State.audioCtx.suspend();
+        } else {
+            State.audioCtx.resume();
+        }
+    }
+});
+</script>
+</body>
+</html>
