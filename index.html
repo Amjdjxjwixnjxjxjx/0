@@ -118,6 +118,7 @@
             cursor: pointer;
             transition: color 0.2s;
             font-family: inherit;
+            min-width: 50px;
         }
 
         .nav-btn svg {
@@ -174,7 +175,6 @@
             border-radius: 8px; display: block;
         }
 
-        /* FIX: Removed -webkit-appearance: none to fix dropdown invisibility on mobile */
         select, input {
             background: var(--bg-color);
             border: 1px solid var(--border);
@@ -513,7 +513,7 @@ const State = {
     audioCtx: null, micStream: null, micSource: null, analyser: null, refGainNode: null, tunerLoopStarted: false,
     isListening: false, isPlayingRef: false, currentExercise: null, sessionStartTime: Date.now(), sessionAttempts: [], noiseFloor: 0.002,
     settings: { A4: 440, refVolume: 0.5, confThreshold: 0.75 },
-    pitchHistory: [], buffer: new Float32Array(4096), // Increased buffer for better low pitch detection
+    pitchHistory: [], buffer: new Float32Array(4096), 
     exState: 'IDLE', detectedPitches: [], detectedVolumes: [], targetMidi: 0, lastInterval: null, lastRandomSeq: [], targetDynamicCurve: []
 };
 
@@ -570,7 +570,7 @@ async function initAudio() {
 
     State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
     State.analyser = State.audioCtx.createAnalyser();
-    State.analyser.fftSize = 4096; // Higher FFT for bass frequencies
+    State.analyser.fftSize = 4096; 
     State.analyser.smoothingTimeConstant = 0;
     State.micSource.connect(State.analyser);
 
@@ -589,7 +589,6 @@ function updateAudioStatus(text, className) {
     el.className = `badge ${className}`;
 }
 
-// YIN Pitch Detection
 function detectPitch() {
     if (!State.analyser) return { freq: -1, confidence: 0, rms: 0 };
     const buffer = State.buffer;
@@ -672,7 +671,6 @@ function getIntervalName(semis) {
     return INTERVALS.find(i => i.semitones === abs) ? INTERVALS.find(i => i.semitones === abs).name : `(${abs})`;
 }
 
-// Audio Playback
 function playReferenceNote(midi, duration = 1.0, delay = 0, dynamicCurve = null) {
     return new Promise(resolve => {
         const ctx = State.audioCtx;
@@ -685,7 +683,6 @@ function playReferenceNote(midi, duration = 1.0, delay = 0, dynamicCurve = null)
         env.gain.setValueAtTime(0, now);
         
         if (dynamicCurve) {
-            // Dynamic exercise: apply volume curve
             for(let i=0; i<dynamicCurve.length; i++) {
                 env.gain.linearRampToValueAtTime(dynamicCurve[i].vol, now + dynamicCurve[i].t);
             }
@@ -712,7 +709,6 @@ async function playSequence(notes) {
     State.isPlayingRef = false;
 }
 
-// Tuner Loop
 let tunerCanvasCtx, tunerCanvas, pitchGraphData = new Array(200).fill(-1);
 function startTunerLoop() {
     tunerCanvas = document.getElementById('pitchGraph');
@@ -799,7 +795,6 @@ function drawPitchGraph(freq, confidence) {
     ctx.stroke();
 }
 
-// Analyze Pitches with OCTAVE EQUIVALENCE (بند قراردادی)
 function analyzePitches(pitches, targetMidi) {
     if (pitches.length < 10) return { valid: false, reason: 'صدای قابل اعتماد دریافت نشد.' };
     
@@ -832,13 +827,12 @@ function analyzePitches(pitches, targetMidi) {
     return { valid: true, meanCents, medCents, stability, score: Math.round(finalScore), octaveShifted };
 }
 
-// --- SINGLE NOTE EXERCISE ---
 async function startSingleNoteExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('singleNoteResultCard').classList.add('hidden');
     document.getElementById('singleNoteListeningCard').classList.add('hidden');
     
-    const targetMidi = 41 + Math.floor(Math.random() * 25); // F2 to F4
+    const targetMidi = 41 + Math.floor(Math.random() * 25); 
     State.currentExercise = { type: 'single_note', targetMidi };
     State.targetMidi = targetMidi;
     
@@ -868,7 +862,6 @@ function stopSingleNote() {
     document.getElementById('singleNoteResultCard').classList.remove('hidden');
 }
 
-// --- INTERVAL EXERCISE ---
 async function startIntervalExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('intervalResultCard').classList.add('hidden');
@@ -919,7 +912,6 @@ function stopListening() {
     document.getElementById('intervalResultCard').classList.remove('hidden');
 }
 
-// --- RANDOM NOTES EXERCISE ---
 async function startRandomExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('randomResultCard').classList.add('hidden');
@@ -972,7 +964,6 @@ function stopRandomListening() {
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
 
-// --- DYNAMIC EXERCISE ---
 async function startDynamicExercise() {
     if (State.audioCtx.state === 'suspended') await State.audioCtx.resume();
     document.getElementById('dynamicResultCard').classList.add('hidden');
@@ -984,13 +975,11 @@ async function startDynamicExercise() {
     State.targetMidi = targetMidi;
     document.getElementById('dynTargetNote').innerText = `${midiToNoteName(targetMidi).persian} ${midiToNoteName(targetMidi).octave}`;
     
-    // Generate Sine Wave Volume Curve over 3 seconds
     const duration = 3.0;
     const points = 30;
     const curve = [];
     for(let i=0; i<=points; i++) {
         const t = i / points;
-        // Sine wave between 0.1 and 0.9
         const vol = 0.5 + 0.4 * Math.sin(t * Math.PI * 2 * (1 + Math.random())) * (1 - t*0.5);
         curve.push({ t: t * duration, vol: Math.max(0.1, Math.min(0.9, vol)) });
     }
@@ -1016,11 +1005,9 @@ function stopDynamic() {
         return;
     }
     
-    // Normalize user RMS to 0-1
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms));
     if (maxUserRms === 0) maxUserRms = 1;
     
-    // Compare average volume difference
     const targetAvg = State.targetDynamicCurve.reduce((a,b) => a+b.vol, 0) / State.targetDynamicCurve.length;
     const userAvg = State.detectedVolumes.reduce((a,b) => a + (b.rms/maxUserRms), 0) / State.detectedVolumes.length;
     const error = Math.abs(targetAvg - userAvg);
@@ -1045,7 +1032,6 @@ function drawDynamicGraph(rms) {
     const w = c.width, h = c.height;
     ctx.fillStyle = '#0f1115'; ctx.fillRect(0, 0, w, h);
     
-    // Draw target curve
     ctx.strokeStyle = 'rgba(255,0,85,0.5)';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -1056,7 +1042,6 @@ function drawDynamicGraph(rms) {
     });
     ctx.stroke();
     
-    // Draw user curve
     let maxUserRms = Math.max(...State.detectedVolumes.map(v => v.rms), 0.01);
     ctx.strokeStyle = '#00ff88';
     ctx.lineWidth = 3;
@@ -1103,7 +1088,6 @@ function drawExerciseGraph(freq) {
     ctx.stroke();
 }
 
-// IndexedDB
 let db;
 function initDB() {
     return new Promise((resolve) => {
@@ -1174,7 +1158,6 @@ function renderAnalytics(attempts) {
     });
     ctx.stroke();
     
-    // Interval Analysis
     const intervals = {};
     attempts.filter(a => a.type === 'interval').forEach(a => {
         const key = `${a.interval}_${a.direction}`;
@@ -1199,7 +1182,6 @@ function renderAnalytics(attempts) {
     document.getElementById('weaknessAnalysis').innerText = weakText;
     document.getElementById('intervalStatsBody').innerHTML = tableHTML;
     
-    // General Stats for Single Note and Dynamic
     const singleNotes = attempts.filter(a => a.type === 'single_note');
     const dynamics = attempts.filter(a => a.type === 'dynamic');
     const avg = (arr) => arr.length > 0 ? (arr.reduce((a,b) => a + b.score, 0) / arr.length).toFixed(0) + '%' : 'ندارد';
@@ -1250,29 +1232,24 @@ function attachEventListeners() {
     document.getElementById('navAnalytics').addEventListener('click', () => navigateTo('analytics', 'تحلیل عملکرد'));
     document.getElementById('navSettings').addEventListener('click', () => navigateTo('settings', 'تنظیمات'));
 
-    // Tuner Single Note
     document.getElementById('btnStartSingleNote').addEventListener('click', startSingleNoteExercise);
     document.getElementById('btnStopSingleNote').addEventListener('click', stopSingleNote);
     document.getElementById('btnNextSingleNote').addEventListener('click', startSingleNoteExercise);
 
-    // Intervals
     document.getElementById('btnStartInterval').addEventListener('click', startIntervalExercise);
     document.getElementById('btnPlayLastInterval').addEventListener('click', async () => { if (State.lastInterval && !State.isPlayingRef) await playSequence([State.lastInterval.startMidi, State.lastInterval.endMidi]); });
     document.getElementById('btnStopListening').addEventListener('click', stopListening);
     document.getElementById('btnNextInterval').addEventListener('click', startIntervalExercise);
 
-    // Random
     document.getElementById('btnStartRandom').addEventListener('click', startRandomExercise);
     document.getElementById('btnPlayLastRandom').addEventListener('click', async () => { if (State.lastRandomSeq && !State.isPlayingRef) await playSequence(State.lastRandomSeq); });
     document.getElementById('btnStopRandomListening').addEventListener('click', stopRandomListening);
     document.getElementById('btnNextRandom').addEventListener('click', startRandomExercise);
 
-    // Dynamic
     document.getElementById('btnStartDynamic').addEventListener('click', startDynamicExercise);
     document.getElementById('btnStopDynamic').addEventListener('click', stopDynamic);
     document.getElementById('btnNextDynamic').addEventListener('click', startDynamicExercise);
 
-    // Settings
     document.getElementById('volSlider').addEventListener('input', function() { setRefVolume(this.value); });
     document.getElementById('a4Select').addEventListener('change', function() { setA4(this.value); });
     document.getElementById('confSelect').addEventListener('change', function() { setConfThreshold(this.value); });
