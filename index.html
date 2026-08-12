@@ -563,8 +563,8 @@
                     <div>
                         <span class="label">حساسیت تشخیص (Confidence Threshold)</span>
                         <select id="confSelect">
-                            <option value="0.85" selected>بالا (سخت‌گیرانه)</option>
-                            <option value="0.75">متوسط</option>
+                            <option value="0.85">بالا (سخت‌گیرانه)</option>
+                            <option value="0.75" selected>متوسط</option>
                             <option value="0.65">پایین (محیط شلوغ)</option>
                         </select>
                     </div>
@@ -638,7 +638,7 @@ const State = {
     settings: {
         A4: 440,
         refVolume: 0.5,
-        confThreshold: 0.85
+        confThreshold: 0.75 // Changed to 0.75 for better responsiveness
     },
     
     pitchHistory: [],
@@ -691,21 +691,12 @@ const SCALES = {
 // ====================================================================
 // INITIALIZATION — MIC AUDIO
 // ====================================================================
-// CRITICAL FIX:
-// getUserMedia() is the VERY FIRST async operation in this function.
-// No await before it. This preserves the transient user activation
-// from the click event. Previously, an `await navigator.permissions.query()`
-// sat before getUserMedia, which could cause the browser to lose
-// the user-gesture context and throw NotAllowedError without ever
-// showing the permission prompt.
-
 async function initAudio() {
     const errEl = document.getElementById('initError');
     const diagEl = document.getElementById('micDiagnostics');
     errEl.innerText = '';
     errEl.style.display = 'none';
 
-    // --- Synchronous environment checks (no await) ---
     const diagnostic = {
         time: new Date().toISOString(),
         protocol: window.location.protocol,
@@ -723,7 +714,6 @@ async function initAudio() {
         iframeAllow: 'N/A'
     };
 
-    // Check Feature-Policy / Permissions-Policy for microphone
     try {
         const fp = document.featurePolicy || (window.featurePolicy ? window.featurePolicy : null);
         if (fp && typeof fp.allowedFeatures === 'function') {
@@ -735,7 +725,6 @@ async function initAudio() {
         diagnostic.featurePolicyMicrophone = `error: ${e.message}`;
     }
 
-    // If in iframe, check the allow attribute
     if (diagnostic.isInIframe) {
         try {
             if (window.frameElement) {
@@ -748,36 +737,39 @@ async function initAudio() {
         }
     }
 
-    // Quick synchronous guard: if mediaDevices doesn't exist at all
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         errEl.style.display = 'block';
-        errEl.innerText = [
-            '╔══════════════════════════════════════════════════╗',
-            '║  navigator.mediaDevices.getUserMedia unavailable  ║',
-            '╚══════════════════════════════════════════════════╝',
-            '',
-            `isSecureContext:    ${diagnostic.isSecureContext}`,
-            `protocol:           ${diagnostic.protocol}`,
-            `origin:             ${diagnostic.origin}`,
-            `mediaDevices:       ${diagnostic.mediaDevicesExists}`,
-            `getUserMedia:       ${diagnostic.getUserMediaExists}`,
-            `topLevel (no iframe): ${diagnostic.topLevel}`,
-            `isInIframe:         ${diagnostic.isInIframe}`,
-            `featurePolicy.mic:  ${diagnostic.featurePolicyMicrophone}`,
-            '',
-            'If isSecureContext is true and mediaDevices is missing,',
-            'the browser may be in a restricted mode or an iframe',
-            'without allow="microphone".'
-        ].join('\n');
+        errEl.innerText = 'navigator.mediaDevices.getUserMedia unavailable\nCheck if you are on HTTPS.';
         if (diagEl) diagEl.textContent = formatMicDiagnostics(diagnostic);
         updateAudioStatus('خطا', 'badge-danger');
         return;
     }
 
     // ================================================================
-    // CRITICAL: getUserMedia is called HERE — as the very first await.
-    // Nothing async happens before this line. The user activation
-    // from the click is fully intact.
+    // FIX: Create AudioContext BEFORE getUserMedia
+    // This preserves the user gesture on iOS/Safari
+    // ================================================================
+    try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) {
+            throw new Error('AudioContext constructor not available');
+        }
+        State.audioCtx = new Ctx();
+        if (State.audioCtx.state === 'suspended') {
+            await State.audioCtx.resume();
+        }
+    } catch (e) {
+        console.error('[AUDIO CTX INIT] Error:', e);
+        const errorName = (e && e.name) ? e.name : 'UnknownError';
+        const errorMsg = (e && e.message) ? e.message : String(e);
+        errEl.style.display = 'block';
+        errEl.innerText = `AudioContext failed to initialize: ${errorName}: ${errorMsg}`;
+        updateAudioStatus('خطا', 'badge-danger');
+        return;
+    }
+
+    // ================================================================
+    // getUserMedia
     // ================================================================
     let stream = null;
     let micError = null;
@@ -796,13 +788,10 @@ async function initAudio() {
         micError = e;
         console.error('[MIC getUserMedia] Error:', e);
 
-        // Retry with the simplest possible constraints (no advanced audio options).
-        // OverconstrainedError or TypeError mean the constraints were rejected,
-        // NOT a permission issue — but retrying costs nothing.
         if (e && (e.name === 'OverconstrainedError' || e.name === 'TypeError' || e.name === 'NotFoundError')) {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                micError = null; // fallback succeeded
+                micError = null; 
             } catch (fallbackError) {
                 console.error('[MIC fallback] Error:', fallbackError);
                 micError = fallbackError;
@@ -810,9 +799,6 @@ async function initAudio() {
         }
     }
 
-    // --- AFTER getUserMedia: query permission state for diagnostics ---
-    // This is intentionally placed AFTER getUserMedia so it never
-    // interferes with the user-activation chain.
     try {
         if (navigator.permissions && navigator.permissions.query) {
             const p = await navigator.permissions.query({ name: 'microphone' });
@@ -822,149 +808,28 @@ async function initAudio() {
         diagnostic.permissionQueryError = `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
     }
 
-    // --- Handle getUserMedia failure ---
     if (micError || !stream) {
         const e = micError || new Error('getUserMedia returned null stream with no error');
         const errorName = (e && e.name) ? e.name : 'UnknownError';
         const errorMsg = (e && e.message) ? e.message : String(e);
-        const errorStack = (e && e.stack) ? e.stack : '(no stack trace available)';
-        const errorConstraint = (e && e.constraint) ? e.constraint : 'none';
-
-        // Build the full error display
-        const lines = [
-            '╔══════════════════════════════════════════════════════════════╗',
-            '║              MICROPHONE ACCESS FAILED                         ║',
-            '╚══════════════════════════════════════════════════════════════╝',
-            '',
-            '┌─── Error Details ────────────────────────────────────────────┐',
-            `│ error.name:       ${errorName}`,
-            `│ error.message:    ${errorMsg}`,
-            `│ error.constraint: ${errorConstraint}`,
-            '└──────────────────────────────────────────────────────────────┘',
-            '',
-            '┌─── Stack Trace ─────────────────────────────────────────────┐',
-            errorStack,
-            '└──────────────────────────────────────────────────────────────┘',
-            '',
-            '┌─── Environment ─────────────────────────────────────────────┐',
-            `│ isSecureContext:     ${diagnostic.isSecureContext}`,
-            `│ protocol:            ${diagnostic.protocol}`,
-            `│ origin:              ${diagnostic.origin}`,
-            `│ hostname:            ${diagnostic.hostname}`,
-            `│ topLevel (no iframe):  ${diagnostic.topLevel}`,
-            `│ isInIframe:          ${diagnostic.isInIframe}`,
-            `│ iframe allow attr:   ${diagnostic.iframeAllow}`,
-            `│ featurePolicy.mic:   ${diagnostic.featurePolicyMicrophone}`,
-            `│ permission state:    ${diagnostic.permissionState}`,
-            `│ mediaDevices exists: ${diagnostic.mediaDevicesExists}`,
-            `│ getUserMedia exists: ${diagnostic.getUserMediaExists}`,
-            `│ userAgent:           ${diagnostic.userAgent}`,
-            '└──────────────────────────────────────────────────────────────┘',
-        ];
-
-        if (errorName === 'NotAllowedError') {
-            lines.push(
-                '',
-                '┌─── NotAllowedError Troubleshooting ─────────────────────────┐',
-                '│',
-                '│ 1. Chrome site settings:',
-                '│    Go to chrome://settings/content/microphone',
-                '│    Find this site and REMOVE it from both Allow and Block.',
-                '│    Then reload this page and click the button again.',
-                '│    The permission prompt should now appear.',
-                '│',
-                '│ 2. If this page is inside an iframe (isInIframe: true):',
-                '│    The parent page MUST include allow="microphone" on the',
-                '│    <iframe> tag. Without it, getUserMedia is blocked.',
-                '│',
-                '│ 3. Check Permissions-Policy / Feature-Policy:',
-                '│    If featurePolicy.mic is false, the browser is blocking',
-                '│    microphone via HTTP headers. On GitHub Pages this should',
-                '│    not happen, but check if a proxy or CDN adds headers.',
-                '│',
-                '│ 4. OS-level microphone access:',
-                '│    Windows: Settings > Privacy > Microphone — ensure apps',
-                '│    are allowed to use the microphone.',
-                '│    macOS: System Preferences > Security & Privacy >',
-                '│    Microphone — ensure Chrome is allowed.',
-                '│',
-                '│ 5. Try incognito/private mode to rule out extensions.',
-                '│',
-                '│ 6. Check if another tab/app is using the microphone.',
-                '│',
-                '│ 7. If Chrome shows "Allow" but you still get this error:',
-                '│    - Click the lock/icon in the address bar',
-                '│    - Reset microphone permission',
-                '│    - Reload the page',
-                '└──────────────────────────────────────────────────────────────┘'
-            );
-        }
-
-        if (errorName === 'NotFoundError') {
-            lines.push(
-                '',
-                '┌─── NotFoundError Troubleshooting ───────────────────────────┐',
-                '│ No microphone device was found.',
-                '│ - Check that a microphone is connected.',
-                '│ - Check OS sound settings.',
-                '└──────────────────────────────────────────────────────────────┘'
-            );
-        }
-
-        if (errorName === 'NotReadableError') {
-            lines.push(
-                '',
-                '┌─── NotReadableError Troubleshooting ────────────────────────┐',
-                '│ A microphone was found but cannot be read.',
-                '│ - Another application may be using it exclusively.',
-                '│ - The device driver may have crashed.',
-                '│ - Try unplugging and replugging the microphone.',
-                '└──────────────────────────────────────────────────────────────┘'
-            );
-        }
-
+        
         errEl.style.display = 'block';
-        errEl.innerText = lines.join('\n');
-
-        if (diagEl) {
-            diagEl.textContent = formatMicDiagnostics({
-                ...diagnostic,
-                lastErrorName: errorName,
-                lastErrorMessage: errorMsg,
-                lastErrorStack: errorStack,
-                lastErrorConstraint: errorConstraint
-            });
-        }
-
+        errEl.innerText = `Microphone Access Failed: ${errorName}\n${errorMsg}`;
+        if (diagEl) diagEl.textContent = formatMicDiagnostics({...diagnostic, lastErrorName: errorName, lastErrorMessage: errorMsg});
         updateAudioStatus('خطا', 'badge-danger');
         return;
     }
 
     // ================================================================
-    // getUserMedia succeeded!
-    // NOW create and resume AudioContext — after the mic is acquired.
+    // SUCCESS - Setup Graph
     // ================================================================
     try {
         State.micStream = stream;
 
-        // Create AudioContext
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) {
-            throw new Error('AudioContext constructor not available (window.AudioContext is undefined)');
-        }
-        State.audioCtx = new Ctx();
-
-        // Resume if suspended (required after user gesture)
-        if (State.audioCtx.state === 'suspended') {
-            await State.audioCtx.resume();
-        }
-
-        // Reference audio graph (isolated from microphone input)
         State.refGainNode = State.audioCtx.createGain();
         State.refGainNode.gain.value = State.settings.refVolume;
         State.refGainNode.connect(State.audioCtx.destination);
 
-        // Microphone graph: mic -> analyser ONLY. Never connect to destination.
         State.micSource = State.audioCtx.createMediaStreamSource(State.micStream);
         State.analyser = State.audioCtx.createAnalyser();
         State.analyser.fftSize = 2048;
@@ -997,31 +862,10 @@ async function initAudio() {
         }
     } catch (e) {
         console.error('[AUDIO INIT] Error:', e);
-        const errorName = (e && e.name) ? e.name : 'UnknownError';
-        const errorMsg = (e && e.message) ? e.message : String(e);
-        const errorStack = (e && e.stack) ? e.stack : '(no stack trace available)';
-
         errEl.style.display = 'block';
-        errEl.innerText = [
-            '╔══════════════════════════════════════════════════════════════╗',
-            '║           AUDIO INITIALIZATION FAILED                        ║',
-            '╚══════════════════════════════════════════════════════════════╝',
-            '',
-            'The microphone permission was granted, but the Web Audio graph',
-            'could not be initialized.',
-            '',
-            `error.name:    ${errorName}`,
-            `error.message: ${errorMsg}`,
-            '',
-            '--- Stack Trace ---',
-            errorStack,
-            '',
-            `AudioContext state: ${State.audioCtx ? State.audioCtx.state : 'not created'}`
-        ].join('\n');
-
+        errEl.innerText = `Audio Graph Initialization Failed: ${e.message}`;
         updateAudioStatus('خطا', 'badge-danger');
 
-        // Clean up the stream since we can't use it
         if (State.micStream) {
             State.micStream.getTracks().forEach(t => t.stop());
             State.micStream = null;
@@ -1037,45 +881,10 @@ function updateAudioStatus(text, className) {
 }
 
 function formatMicDiagnostics(d) {
-    const lines = [
-        '=== MICROPHONE DIAGNOSTICS ===',
-        `time:                   ${d.time || 'N/A'}`,
-        `isSecureContext:        ${d.isSecureContext}`,
-        `protocol:               ${d.protocol}`,
-        `origin:                 ${d.origin}`,
-        `hostname:               ${d.hostname}`,
-        `topLevel (no iframe):   ${d.topLevel}`,
-        `isInIframe:             ${d.isInIframe}`,
-        `iframe allow attribute: ${d.iframeAllow || 'N/A'}`,
-        `navigator.mediaDevices:           ${d.mediaDevicesExists}`,
-        `navigator.mediaDevices.getUserMedia: ${d.getUserMediaExists}`,
-        `navigator.permissions:  ${d.permissionsAPIExists}`,
-        `microphone permission:  ${d.permissionState}`,
-        `featurePolicy.mic:      ${d.featurePolicyMicrophone !== undefined ? d.featurePolicyMicrophone : 'N/A'}`,
-        `userAgent:              ${d.userAgent}`
-    ];
-
-    if (d.permissionQueryError) lines.push(`permission query error: ${d.permissionQueryError}`);
-
-    if (d.lastErrorName) {
-        lines.push('');
-        lines.push('=== LAST ERROR ===');
-        lines.push(`error.name:       ${d.lastErrorName}`);
-        lines.push(`error.message:    ${d.lastErrorMessage}`);
-        if (d.lastErrorConstraint) lines.push(`error.constraint: ${d.lastErrorConstraint}`);
-        if (d.lastErrorStack) {
-            lines.push('--- error.stack ---');
-            lines.push(d.lastErrorStack);
-        }
-    }
-
-    if ('streamActive' in d) lines.push(`\nstream.active:        ${d.streamActive}`);
-    if ('audioTrackCount' in d) lines.push(`audio tracks:         ${d.audioTrackCount}`);
-    if (d.trackLabel) lines.push(`track.label:          ${d.trackLabel}`);
-    if (d.trackSettings) lines.push(`track.settings:       ${d.trackSettings}`);
-    if (d.audioContextState) lines.push(`AudioContext.state:   ${d.audioContextState}`);
-    if (d.success) lines.push('\nRESULT: microphone stream successfully acquired ✓');
-
+    const lines = ['=== MICROPHONE DIAGNOSTICS ===', `time: ${d.time || 'N/A'}`, `isSecureContext: ${d.isSecureContext}`, `protocol: ${d.protocol}`, `origin: ${d.origin}`, `topLevel: ${d.topLevel}`, `isInIframe: ${d.isInIframe}`, `mediaDevices: ${d.mediaDevicesExists}`, `getUserMedia: ${d.getUserMediaExists}`, `permission: ${d.permissionState}`];
+    if (d.lastErrorName) lines.push(`\nERROR: ${d.lastErrorName} - ${d.lastErrorMessage}`);
+    if ('streamActive' in d) lines.push(`\nstream.active: ${d.streamActive}`);
+    if (d.success) lines.push('\nRESULT: mic successfully acquired ✓');
     return lines.join('\n');
 }
 
@@ -1087,66 +896,26 @@ async function runMicDiagnostics() {
         time: new Date().toISOString(),
         protocol: window.location.protocol,
         origin: window.location.origin,
-        href: window.location.href,
-        hostname: window.location.hostname,
         isSecureContext: window.isSecureContext,
         mediaDevicesExists: !!navigator.mediaDevices,
         getUserMediaExists: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
-        permissionsAPIExists: !!navigator.permissions,
         topLevel: window.top === window.self,
         isInIframe: window.top !== window.self,
-        iframeAllow: 'N/A',
         userAgent: navigator.userAgent
     };
 
-    // Check Feature-Policy
-    try {
-        const fp = document.featurePolicy || (window.featurePolicy ? window.featurePolicy : null);
-        if (fp && typeof fp.allowedFeatures === 'function') {
-            d.featurePolicyMicrophone = fp.allowedFeatures().includes('microphone');
-        } else {
-            d.featurePolicyMicrophone = 'Feature-Policy API unavailable';
-        }
-    } catch(e) {
-        d.featurePolicyMicrophone = `error: ${e.message}`;
-    }
-
-    // If in iframe, check the allow attribute
-    if (d.isInIframe) {
-        try {
-            if (window.frameElement) {
-                d.iframeAllow = window.frameElement.getAttribute('allow') || '(empty allow attribute)';
-            } else {
-                d.iframeAllow = 'cross-origin iframe (cannot inspect)';
-            }
-        } catch(e) {
-            d.iframeAllow = `cannot read: ${e.message}`;
-        }
-    }
-
-    // Query permission state (safe — does NOT call getUserMedia)
     try {
         if (navigator.permissions && navigator.permissions.query) {
             const p = await navigator.permissions.query({ name: 'microphone' });
             d.permissionState = p.state;
-        } else {
-            d.permissionState = 'Permissions API unavailable';
         }
     } catch (e) {
         d.permissionState = 'query failed';
-        d.permissionQueryError = `${e.name || 'UnknownError'}: ${e.message || String(e)}`;
     }
 
     if (State.micStream) {
         d.streamActive = State.micStream.active;
-        d.audioTrackCount = State.micStream.getAudioTracks().length;
-        const track = State.micStream.getAudioTracks()[0];
-        if (track) {
-            d.trackLabel = track.label;
-            d.trackSettings = JSON.stringify(track.getSettings(), null, 2);
-        }
     }
-
     if (State.audioCtx) d.audioContextState = State.audioCtx.state;
 
     diagEl.textContent = formatMicDiagnostics(d);
@@ -1159,9 +928,18 @@ function detectPitch() {
     if (!State.analyser) return { freq: -1, confidence: 0, rms: 0 };
     
     const buffer = State.buffer;
-    State.analyser.getFloatTimeDomainData(buffer);
     
-    // RMS for VAD
+    // FIX: Fallback for older browsers that don't support getFloatTimeDomainData
+    if (State.analyser.getFloatTimeDomainData) {
+        State.analyser.getFloatTimeDomainData(buffer);
+    } else {
+        const byteBuffer = new Uint8Array(buffer.length);
+        State.analyser.getByteTimeDomainData(byteBuffer);
+        for(let i=0; i<byteBuffer.length; i++) {
+            buffer[i] = (byteBuffer[i] - 128) / 128.0;
+        }
+    }
+    
     let rms = 0;
     for(let i=0; i<buffer.length; i++) rms += buffer[i]*buffer[i];
     rms = Math.sqrt(rms/buffer.length);
@@ -1171,7 +949,6 @@ function detectPitch() {
     const sampleRate = State.audioCtx.sampleRate;
     const yinBuffer = new Float32Array(buffer.length / 2);
     
-    // Step 1: Difference function
     for (let tau = 0; tau < yinBuffer.length; tau++) {
         yinBuffer[tau] = 0;
     }
@@ -1184,7 +961,6 @@ function detectPitch() {
         yinBuffer[tau] = sum;
     }
     
-    // Step 2: Cumulative mean normalized difference function
     yinBuffer[0] = 1;
     let runningSum = 0;
     for (let tau = 1; tau < yinBuffer.length; tau++) {
@@ -1192,7 +968,6 @@ function detectPitch() {
         yinBuffer[tau] = yinBuffer[tau] * tau / runningSum;
     }
     
-    // Step 3: Absolute threshold
     const threshold = 1 - State.settings.confThreshold;
     let tauEstimate = -1;
     for (let tau = 2; tau < yinBuffer.length; tau++) {
@@ -1207,7 +982,6 @@ function detectPitch() {
     
     if (tauEstimate === -1) return { freq: -1, confidence: 0, rms };
     
-    // Step 4: Parabolic interpolation
     let betterTau;
     let x0 = tauEstimate > 0 ? tauEstimate - 1 : tauEstimate;
     let x2 = tauEstimate + 1 < yinBuffer.length ? tauEstimate + 1 : tauEstimate;
@@ -1227,7 +1001,6 @@ function detectPitch() {
     const freq = sampleRate / betterTau;
     const confidence = 1 - yinBuffer[tauEstimate];
     
-    // Filter unreasonable vocal ranges
     if (freq < 60 || freq > 1000) return { freq: -1, confidence: 0, rms };
     
     return { freq, confidence, rms };
@@ -1312,6 +1085,16 @@ let pitchGraphData = new Array(200).fill(-1);
 
 function startTunerLoop() {
     tunerCanvas = document.getElementById('pitchGraph');
+    if (!tunerCanvas) return;
+    
+    // FIX: Sync internal canvas resolution with CSS size
+    const resizeTunerCanvas = () => {
+        tunerCanvas.width = tunerCanvas.clientWidth;
+        tunerCanvas.height = tunerCanvas.clientHeight;
+    };
+    resizeTunerCanvas();
+    window.addEventListener('resize', resizeTunerCanvas);
+
     tunerCanvasCtx = tunerCanvas.getContext('2d');
     
     function loop() {
@@ -1319,7 +1102,6 @@ function startTunerLoop() {
         updateTunerUI(freq, confidence);
         drawPitchGraph(freq, confidence);
         
-        // Handle active exercise recording
         if (State.exState === 'LISTENING') {
             if (confidence > State.settings.confThreshold) {
                 State.detectedPitches.push({ freq, time: performance.now() });
@@ -1388,6 +1170,8 @@ function updateTunerUI(freq, confidence) {
 }
 
 function drawPitchGraph(freq, confidence) {
+    if (!tunerCanvasCtx || tunerCanvas.width === 0) return;
+    
     const ctx = tunerCanvasCtx;
     const w = tunerCanvas.width;
     const h = tunerCanvas.height;
@@ -1398,7 +1182,6 @@ function drawPitchGraph(freq, confidence) {
     ctx.fillStyle = '#0f1115';
     ctx.fillRect(0, 0, w, h);
     
-    // Grid
     ctx.strokeStyle = '#2a2f3a';
     ctx.lineWidth = 1;
     for(let i=0; i<5; i++) {
@@ -1408,7 +1191,6 @@ function drawPitchGraph(freq, confidence) {
         ctx.stroke();
     }
     
-    // Pitch curve
     ctx.strokeStyle = '#00d4ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -1443,8 +1225,6 @@ async function startIntervalExercise() {
     document.getElementById('intervalListeningCard').classList.add('hidden');
     document.getElementById('intervalTargetCard').classList.remove('hidden');
     
-    // Generate random interval
-    // Range F2(41) to F4(65)
     const startMidi = 41 + Math.floor(Math.random() * 13);
     const possibleIntervals = [2, 3, 4, 5, 7, 9, 12];
     const intervalSemis = possibleIntervals[Math.floor(Math.random() * possibleIntervals.length)];
@@ -1463,13 +1243,7 @@ async function startIntervalExercise() {
         direction = 'نزولی';
     }
     
-    State.currentExercise = {
-        type: 'interval',
-        startMidi, 
-        endMidi, 
-        interval: endMidi - startMidi,
-        direction
-    };
+    State.currentExercise = { type: 'interval', startMidi, endMidi, interval: endMidi - startMidi, direction };
     State.lastInterval = State.currentExercise;
     
     const startNote = midiToNoteName(startMidi);
@@ -1525,7 +1299,6 @@ function analyzePitches(pitches, targetMidi) {
     }
     
     const meanCents = filteredCents.reduce((a,b) => a+b, 0) / filteredCents.length;
-    
     const variance = filteredCents.reduce((a,b) => a + Math.pow(b - meanCents, 2), 0) / filteredCents.length;
     const stdDev = Math.sqrt(variance);
     const stability = Math.max(0, 100 - stdDev * 2);
@@ -1538,15 +1311,7 @@ function analyzePitches(pitches, targetMidi) {
     const accuracyScore = Math.max(0, 100 - Math.abs(medCents) * 2);
     const finalScore = (accuracyScore * 0.5) + (stability * 0.2) + (85 * 0.15) + (stability * 0.15);
     
-    return {
-        valid: true,
-        meanCents, 
-        medCents, 
-        stability, 
-        drift,
-        score: Math.round(finalScore),
-        count: filteredCents.length
-    };
+    return { valid: true, meanCents, medCents, stability, drift, score: Math.round(finalScore), count: filteredCents.length };
 }
 
 function displayIntervalResult(a) {
@@ -1578,36 +1343,15 @@ function displayIntervalResult(a) {
             <div style="color:var(--text-muted); margin-top:5px;">${rating}</div>
         </div>
         <div class="stat-grid">
-            <div class="stat-item">
-                <div class="stat-label">میانگین خطا</div>
-                <div class="stat-value">${a.meanCents > 0 ? '+' : ''}${a.meanCents.toFixed(1)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">Median</div>
-                <div class="stat-value">${a.medCents > 0 ? '+' : ''}${a.medCents.toFixed(1)}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">پایداری</div>
-                <div class="stat-value">${a.stability.toFixed(0)}%</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-label">Drift</div>
-                <div class="stat-value">${a.drift > 0 ? '+' : ''}${a.drift.toFixed(0)}</div>
-            </div>
+            <div class="stat-item"><div class="stat-label">میانگین خطا</div><div class="stat-value">${a.meanCents > 0 ? '+' : ''}${a.meanCents.toFixed(1)}</div></div>
+            <div class="stat-item"><div class="stat-label">Median</div><div class="stat-value">${a.medCents > 0 ? '+' : ''}${a.medCents.toFixed(1)}</div></div>
+            <div class="stat-item"><div class="stat-label">پایداری</div><div class="stat-value">${a.stability.toFixed(0)}%</div></div>
+            <div class="stat-item"><div class="stat-label">Drift</div><div class="stat-value">${a.drift > 0 ? '+' : ''}${a.drift.toFixed(0)}</div></div>
         </div>
         <div class="analysis-text" style="margin-top:15px;">${analysisText}</div>
     `;
     
-    saveAttempt({
-        timestamp: Date.now(),
-        type: 'interval',
-        targetMidi: State.currentExercise.endMidi,
-        interval: State.currentExercise.interval,
-        direction: State.currentExercise.direction,
-        score: a.score,
-        centsError: a.medCents,
-        valid: true
-    });
+    saveAttempt({ timestamp: Date.now(), type: 'interval', targetMidi: State.currentExercise.endMidi, interval: State.currentExercise.interval, direction: State.currentExercise.direction, score: a.score, centsError: a.medCents, valid: true });
 }
 
 // ====================================================================
@@ -1673,13 +1417,7 @@ function stopRandomListening() {
                 <div class="stat-item"><div class="stat-label">پایداری</div><div class="stat-value">${analysis.stability.toFixed(0)}%</div></div>
             </div>
         `;
-        saveAttempt({
-            timestamp: Date.now(),
-            type: 'random',
-            score: analysis.score,
-            centsError: analysis.medCents,
-            valid: true
-        });
+        saveAttempt({ timestamp: Date.now(), type: 'random', score: analysis.score, centsError: analysis.medCents, valid: true });
     }
     document.getElementById('randomResultCard').classList.remove('hidden');
 }
@@ -1694,10 +1432,15 @@ function drawExerciseGraph(freq) {
     if (!exCanvasCtx || exCanvas !== c) {
         exCanvasCtx = c.getContext('2d');
         exCanvas = c;
+        // FIX: Sync internal canvas resolution with CSS size
+        c.width = c.clientWidth;
+        c.height = c.clientHeight;
     }
     
     const w = c.width;
     const h = c.height;
+    
+    if (w === 0 || h === 0) return;
     
     exCanvasCtx.fillStyle = '#0f1115';
     exCanvasCtx.fillRect(0, 0, w, h);
@@ -1741,10 +1484,7 @@ function drawExerciseGraph(freq) {
 let db;
 function initDB() {
     return new Promise((resolve) => {
-        if (!window.indexedDB) {
-            resolve();
-            return;
-        }
+        if (!window.indexedDB) { resolve(); return; }
         const req = indexedDB.open('VocalTrainerDB', 1);
         req.onupgradeneeded = e => {
             const d = e.target.result;
@@ -1773,7 +1513,6 @@ function endSession() {
     const valid = State.sessionAttempts.filter(a => a.valid);
     const overall = valid.reduce((a,b) => a + b.score, 0) / valid.length;
     const avgErr = valid.reduce((a,b) => a + Math.abs(b.centsError), 0) / valid.length;
-    
     const duration = Math.round((Date.now() - State.sessionStartTime) / 60000);
     
     let report = `
@@ -1791,17 +1530,11 @@ function endSession() {
     
     if (db) {
         const tx = db.transaction('sessions', 'readwrite');
-        tx.objectStore('sessions').add({
-            date: new Date().toLocaleDateString('fa-IR'),
-            timestamp: Date.now(),
-            score: overall,
-            count: valid.length
-        });
+        tx.objectStore('sessions').add({ date: new Date().toLocaleDateString('fa-IR'), timestamp: Date.now(), score: overall, count: valid.length });
     }
     
     State.sessionAttempts = [];
     State.sessionStartTime = Date.now();
-    
     loadHistory();
 }
 
@@ -1829,10 +1562,7 @@ async function loadHistory() {
         sessions.slice(-10).reverse().forEach(s => {
             const div = document.createElement('div');
             div.style.cssText = 'display:flex; justify-content:space-between; padding:15px; background:var(--bg-color); border-radius:8px;';
-            div.innerHTML = `
-                <span>${s.date}</span>
-                <span style="color:var(--accent); font-weight:bold;">امتیاز: ${s.score.toFixed(0)}%</span>
-            `;
+            div.innerHTML = `<span>${s.date}</span><span style="color:var(--accent); font-weight:bold;">امتیاز: ${s.score.toFixed(0)}%</span>`;
             histList.appendChild(div);
         });
     }
@@ -1848,6 +1578,9 @@ async function loadHistory() {
 
 function renderAnalytics(attempts) {
     const c = document.getElementById('chartProgress');
+    // Ensure canvas resolution is correct
+    c.width = c.clientWidth;
+    c.height = c.clientHeight;
     const ctx = c.getContext('2d');
     ctx.fillStyle = '#0f1115';
     ctx.fillRect(0,0,c.width,c.height);
@@ -1895,13 +1628,7 @@ function renderAnalytics(attempts) {
             const avgCents = data.totalCents / data.count;
             const [semis, dir] = k.split('_');
             
-            tableHTML += `<tr>
-                <td>${getIntervalName(parseInt(semis))}</td>
-                <td>${dir}</td>
-                <td>${data.count}</td>
-                <td>${avgScore.toFixed(0)}%</td>
-                <td>${avgCents > 0 ? '+' : ''}${avgCents.toFixed(0)}</td>
-            </tr>`;
+            tableHTML += `<tr><td>${getIntervalName(parseInt(semis))}</td><td>${dir}</td><td>${data.count}</td><td>${avgScore.toFixed(0)}%</td><td>${avgCents > 0 ? '+' : ''}${avgCents.toFixed(0)}</td></tr>`;
             
             if (avgScore < weakestScore) {
                 weakestScore = avgScore;
@@ -1932,18 +1659,9 @@ function navigateTo(viewId, title) {
     if (viewId === 'history' || viewId === 'analytics') loadHistory();
 }
 
-function setRefVolume(v) {
-    State.settings.refVolume = parseFloat(v);
-    if (State.refGainNode) State.refGainNode.gain.value = State.settings.refVolume;
-}
-
-function setA4(v) {
-    State.settings.A4 = parseInt(v);
-}
-
-function setConfThreshold(v) {
-    State.settings.confThreshold = parseFloat(v);
-}
+function setRefVolume(v) { State.settings.refVolume = parseFloat(v); if (State.refGainNode) State.refGainNode.gain.value = State.settings.refVolume; }
+function setA4(v) { State.settings.A4 = parseInt(v); }
+function setConfThreshold(v) { State.settings.confThreshold = parseFloat(v); }
 
 async function calibrateMic() {
     const statusEl = document.getElementById('calibStatus');
@@ -1966,35 +1684,27 @@ async function calibrateMic() {
 }
 
 // ====================================================================
-// EVENT LISTENERS (using addEventListener, NOT inline onclick)
+// EVENT LISTENERS
 // ====================================================================
-// We attach listeners after DOM is ready. This is cleaner and ensures
-// the user-activation chain is properly maintained.
-
 function attachEventListeners() {
-    // Welcome overlay buttons
     document.getElementById('btnInitAudio').addEventListener('click', initAudio);
     document.getElementById('btnRunDiagnostics').addEventListener('click', runMicDiagnostics);
 
-    // Navigation
     document.getElementById('navTuner').addEventListener('click', () => navigateTo('tuner', 'تیونر'));
     document.getElementById('navIntervals').addEventListener('click', () => navigateTo('intervals', 'تمرین فواصل'));
     document.getElementById('navRandom').addEventListener('click', () => navigateTo('random', 'رندوم نت'));
     document.getElementById('navAnalytics').addEventListener('click', () => navigateTo('analytics', 'تحلیل عملکرد'));
     document.getElementById('navSettings').addEventListener('click', () => navigateTo('settings', 'تنظیمات'));
 
-    // Interval trainer
     document.getElementById('btnStartInterval').addEventListener('click', startIntervalExercise);
     document.getElementById('btnPlayLastInterval').addEventListener('click', playLastInterval);
     document.getElementById('btnStopListening').addEventListener('click', stopListening);
     document.getElementById('btnNextInterval').addEventListener('click', startIntervalExercise);
 
-    // Random notes
     document.getElementById('btnStartRandom').addEventListener('click', startRandomExercise);
     document.getElementById('btnStopRandomListening').addEventListener('click', stopRandomListening);
     document.getElementById('btnNextRandom').addEventListener('click', startRandomExercise);
 
-    // Settings
     document.getElementById('volSlider').addEventListener('input', function() { setRefVolume(this.value); });
     document.getElementById('a4Select').addEventListener('change', function() { setA4(this.value); });
     document.getElementById('confSelect').addEventListener('change', function() { setConfThreshold(this.value); });
@@ -2002,20 +1712,13 @@ function attachEventListeners() {
     document.getElementById('btnEndSession').addEventListener('click', endSession);
 }
 
-// ====================================================================
-// ON LOAD
-// ====================================================================
 window.addEventListener('DOMContentLoaded', () => {
     attachEventListeners();
-    initDB().then(() => {
-        runMicDiagnostics();
-    });
+    initDB().then(() => { runMicDiagnostics(); });
 });
 
-// Visibility change: suspend/resume AudioContext
 document.addEventListener('visibilitychange', async () => {
     if (!State.audioCtx) return;
-
     try {
         if (document.hidden) {
             await State.audioCtx.suspend();
@@ -2026,10 +1729,7 @@ document.addEventListener('visibilitychange', async () => {
                 startTunerLoop();
             }
         }
-    } catch (e) {
-        console.error('[VISIBILITY AUDIO] error:', e.name, e.message, e);
-    }
-
+    } catch (e) { console.error('[VISIBILITY AUDIO] error:', e.name, e.message, e); }
     runMicDiagnostics();
 });
 </script>
