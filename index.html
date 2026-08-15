@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تمرین تنفس آواز — Breath Master</title>
+<title>تمرین تنفس آواز — Breath Master Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -96,7 +96,7 @@
     align-items:center;
     justify-content:center;
     flex-direction:column;
-    transition:transform 0.15s ease-out, box-shadow 0.3s ease;
+    transition:transform 0.15s ease-out, box-shadow 0.3s ease, background 0.3s ease;
     position:relative;
   }
   .breath-core.active{
@@ -119,6 +119,16 @@
       radial-gradient(circle at 65% 70%, rgba(245,158,11,0.35), transparent 60%),
       linear-gradient(145deg,#b45309,#0891b2);
   }
+  .breath-core.paused{
+    box-shadow:
+      0 0 50px rgba(239,68,68,0.4),
+      0 0 100px rgba(245,158,11,0.2),
+      inset 0 0 40px rgba(0,0,0,0.3);
+    background:
+      radial-gradient(circle at 35% 30%, rgba(248,113,113,0.5), transparent 60%),
+      radial-gradient(circle at 65% 70%, rgba(245,158,11,0.35), transparent 60%),
+      linear-gradient(145deg,#9f1239,#0891b2);
+  }
   .timer-display{
     font-size:3.2rem;
     font-weight:900;
@@ -140,6 +150,7 @@
     color:rgba(255,255,255,0.9);
     margin-top:6px;
     backdrop-filter:blur(8px);
+    text-align:center;
   }
   /* موج صوتی */
   .wave-bar{
@@ -242,7 +253,7 @@
     transition:all 0.2s;
     animation:slideIn 0.4s ease-out;
   }
-  .record-item:hover{border-color:rgba(129,140,248,0.3);transform:translateX(-4px);}
+  .record-item:hover{border-color:rgba(129,140,248,0.3);}
   .record-item.best{
     background:linear-gradient(145deg,rgba(245,158,11,0.15),rgba(245,158,11,0.05));
     border-color:rgba(245,158,11,0.4);
@@ -256,9 +267,14 @@
     padding:2px 8px;
     border-radius:6px;
     font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
   }
   .badge-best{background:rgba(245,158,11,0.2);color:#fbbf24;}
   .badge-imp{background:rgba(16,185,129,0.2);color:#34d399;}
+  .badge-warn{background:rgba(245,158,11,0.2);color:#fbbf24;}
+  .badge-info{background:rgba(6,182,212,0.2);color:#22d3ee;}
   /* اسکرول */
   .scroll-y{overflow-y:auto;}
   .scroll-y::-webkit-scrollbar{width:6px;}
@@ -323,6 +339,8 @@
     display:flex;align-items:center;justify-content:center;
     background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(6,182,212,0.2));
     flex-shrink:0;
+    font-weight:700;
+    color:#a5b4fc;
   }
   /* مدال */
   .modal-bg{
@@ -349,19 +367,6 @@
     animation:spin 0.8s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
-  /* رقص نور هنگام ضبط */
-  .recording-pulse::after{
-    content:'';
-    position:absolute;
-    inset:-8px;
-    border-radius:50%;
-    border:2px solid rgba(16,185,129,0.5);
-    animation:recPulse 1.6s ease-out infinite;
-  }
-  @keyframes recPulse{
-    0%{transform:scale(0.9);opacity:0.8;}
-    100%{transform:scale(1.3);opacity:0;}
-  }
   /* واکنش‌گرا */
   @media(max-width:1024px){
     .breath-stage{width:280px;height:280px;}
@@ -372,6 +377,20 @@
     .breath-stage{width:240px;height:240px;}
     .breath-core{width:150px;height:150px;}
     .timer-display{font-size:2rem;}
+  }
+  
+  /* انیمیشن موج مکث */
+  .pause-pulse::after{
+    content:'';
+    position:absolute;
+    inset:-8px;
+    border-radius:50%;
+    border:2px solid rgba(245,158,11,0.5);
+    animation:pausePulse 1s ease-out infinite;
+  }
+  @keyframes pausePulse{
+    0%{transform:scale(0.95);opacity:0.8;}
+    100%{transform:scale(1.2);opacity:0;}
   }
 </style>
 </head>
@@ -390,7 +409,7 @@
       </div>
       <div>
         <h1 class="text-2xl sm:text-3xl font-black title-grad leading-tight">تمرین تنفس آواز</h1>
-        <p class="text-xs sm:text-sm text-slate-400">Breath Master — رشد ظرفیت تنفسی، گام به گام</p>
+        <p class="text-xs sm:text-sm text-slate-400">Breath Master — رشد ظرفیت تنفسی با تحلیل دقیق</p>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -436,7 +455,7 @@
         </button>
         <button id="manualRecBtn" class="btn btn-success flex-1 min-w-[180px]" disabled>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
-          ثبت رکورد بعدی
+          پایان و رکورد بعدی
         </button>
       </div>
 
@@ -448,7 +467,7 @@
           </div>
           <div>
             <p class="font-semibold text-indigo-200 mb-1">حالت دم آزاد</p>
-            <p class="text-slate-300 text-xs leading-relaxed">هر بار که در میکروفون هوا بدمی، تایمر خودکار شروع می‌شود و وقتی صدای دم قطع شد، رکورد ثبت می‌شود. دکمه «ثبت رکورد بعدی» برای شروع دستی رکورد بعدی است.</p>
+            <p class="text-slate-300 text-xs leading-relaxed">هر بار که در میکروفون هوا بدمی، تایمر خودکار شروع می‌شود و وقتی صدای دم قطع شد، ۳ ثانیه فرصت داری ادامه بدی. در غیر این صورت رکورد ثبت می‌شود.</p>
           </div>
         </div>
       </div>
@@ -491,22 +510,11 @@
             <span id="thresholdVal" class="font-mono text-amber-400 font-bold">۵٪</span>
           </div>
           <input type="range" id="thresholdSlider" min="1" max="40" value="5" step="0.5">
-          <p class="text-xs text-slate-500 mt-1.5">اگر تایمر بدون دم روشن می‌شود، آستانه را بالا ببر. اگر با دم قوی هم شروع نمی‌شود، آستانه را پایین بیاور.</p>
-        </div>
-
-        <!-- زمان سکوت -->
-        <div class="mb-4">
-          <div class="flex justify-between text-sm mb-2">
-            <label class="text-slate-300">تأخیر قطع (میلی‌ثانیه)</label>
-            <span id="silenceDelayVal" class="font-mono text-cyan-400 font-bold">۳۰۰ms</span>
-          </div>
-          <input type="range" id="silenceSlider" min="100" max="1000" value="300" step="50">
-          <p class="text-xs text-slate-500 mt-1.5">مدت صبر پس از قطع صدا تا ثبت رکورد. کمتر = حساس‌تر، بیشتر = پایدارتر.</p>
         </div>
 
         <!-- نمودار موج -->
         <div>
-          <div class="text-xs text-slate-400 mb-2">نمودار موج صوتی</div>
+          <div class="text-xs text-slate-400 mb-2">نمودار موج صوتی زنده</div>
           <div id="waveBars" class="flex items-end gap-1 h-16 bg-black/20 rounded-lg p-2"></div>
         </div>
       </div>
@@ -524,29 +532,19 @@
             <div class="text-[10px] text-slate-500">ثانیه</div>
           </div>
           <div class="glass-strong p-3 rounded-xl text-center">
-            <div class="text-xs text-slate-400 mb-1">میانگین</div>
+            <div class="text-xs text-slate-400 mb-1">میانگین زمان</div>
             <div class="text-xl font-black text-cyan-400 font-mono" id="statAvg">۰٫۰</div>
             <div class="text-[10px] text-slate-500">ثانیه</div>
           </div>
           <div class="glass-strong p-3 rounded-xl text-center">
-            <div class="text-xs text-slate-400 mb-1">تعداد رکوردها</div>
-            <div class="text-xl font-black text-indigo-400 font-mono" id="statCount">۰</div>
-            <div class="text-[10px] text-slate-500">رکورد</div>
+            <div class="text-xs text-slate-400 mb-1">میانگین یک‌دستی</div>
+            <div class="text-xl font-black text-indigo-400 font-mono" id="statConsist">۰٪</div>
+            <div class="text-[10px] text-slate-500">امتیاز پایداری</div>
           </div>
           <div class="glass-strong p-3 rounded-xl text-center">
-            <div class="text-xs text-slate-400 mb-1">مجموع زمان</div>
-            <div class="text-xl font-black text-emerald-400 font-mono" id="statTotal">۰٫۰</div>
-            <div class="text-[10px] text-slate-500">ثانیه</div>
-          </div>
-        </div>
-        <!-- پیشرفت نسبت به قبل -->
-        <div class="mt-3 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/20">
-          <div class="flex justify-between text-xs mb-1.5">
-            <span class="text-slate-400">پیشرفت نسبت به ۵ رکورد اخیر</span>
-            <span id="trendVal" class="font-bold text-slate-300">—</span>
-          </div>
-          <div class="h-1.5 bg-black/30 rounded-full overflow-hidden">
-            <div id="trendBar" class="h-full bg-gradient-to-l from-emerald-400 to-cyan-400 transition-all" style="width:0%"></div>
+            <div class="text-xs text-slate-400 mb-1">تعداد رکوردها</div>
+            <div class="text-xl font-black text-emerald-400 font-mono" id="statCount">۰</div>
+            <div class="text-[10px] text-slate-500">رکورد</div>
           </div>
         </div>
       </div>
@@ -580,7 +578,6 @@
             <div class="metro-dot" id="dot4"></div>
           </div>
         </div>
-        <p class="text-xs text-slate-500">الگوی پیشنهادی: ۴ ثانیه دم، ۴ ثانیه بازدم. با سرعت ۶۰ BPM معادل هر ضرب ۱ ثانیه.</p>
       </div>
 
     </aside>
@@ -594,14 +591,14 @@
       <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold text-lg flex items-center gap-2">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          رکوردهای ثبت‌شده
+          رکوردهای ثبت‌شده (با نمودار ولوم)
         </h2>
         <div class="flex gap-2">
           <button id="exportBtn" class="btn btn-ghost text-xs px-3 py-1.5">خروجی CSV</button>
           <button id="clearBtn" class="btn btn-danger text-xs px-3 py-1.5">پاک کردن همه</button>
         </div>
       </div>
-      <div id="recordsList" class="scroll-y space-y-2" style="max-height:420px;">
+      <div id="recordsList" class="scroll-y space-y-3" style="max-height:680px;">
         <div class="text-center py-12 text-slate-500 text-sm" id="emptyState">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto mb-3 opacity-30"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <p>هنوز رکوردی ثبت نشده. شروع کن و اولین نفس‌ت را اندازه بگیر!</p>
@@ -613,10 +610,9 @@
     <div class="lg:col-span-5 glass p-5">
       <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        راهنمای علمی تنفس در آواز
+        راهنمای علمی تنفس
       </h2>
-      <div class="space-y-3 text-sm scroll-y" style="max-height:420px;">
-
+      <div class="space-y-3 text-sm scroll-y" style="max-height:680px;">
         <div class="tip-card">
           <div class="flex gap-3">
             <div class="tip-icon">۱</div>
@@ -626,27 +622,24 @@
             </div>
           </div>
         </div>
-
         <div class="tip-card">
           <div class="flex gap-3">
             <div class="tip-icon">۲</div>
             <div>
-              <p class="font-semibold text-indigo-200 mb-1">تمرین SSS پایدار</p>
-              <p class="text-slate-300 text-xs leading-relaxed">یک صدای سوت‌مانند «سسسسس» با فشار هوای ثابت تولید کن. هدف این است که صدا یکنواخت بماند و نوسان نداشته باشد. این تمرین کنترل بازدم را تقویت می‌کند.</p>
+              <p class="font-semibold text-indigo-200 mb-1">یک‌دستی صدا (Consistency)</p>
+              <p class="text-slate-300 text-xs leading-relaxed">در تمرین SSS، هدف این است که نمودار ولوم زیر رکوردت صاف باشد نه پرفشار و افت‌کننده. امتیاز یک‌دستی نشان‌دهنده کنترل عضلات تنفسی است.</p>
             </div>
           </div>
         </div>
-
         <div class="tip-card">
           <div class="flex gap-3">
             <div class="tip-icon">۳</div>
             <div>
-              <p class="font-semibold text-indigo-200 mb-1">نسبت دم به بازدم</p>
-              <p class="text-slate-300 text-xs leading-relaxed">در آواز حرفه‌ای، دم سریع (۱–۲ ثانیه) و بازدم کنترل‌شده و طولانی (۸–۲۰ ثانیه و بیشتر) است. این ابزار مخصوص تمرین طول بازدم طراحی شده.</p>
+              <p class="font-semibold text-indigo-200 mb-1">قانون ۳ ثانیه مکث</p>
+              <p class="text-slate-300 text-xs leading-relaxed">اگر وسط تمرین نفست کم شود، ۳ ثانیه فرصت داری دوباره صدای سسس را ادامه بدهی تا تایمر متوقف نشود. این شبیه‌سازی شرایط واقعی آواز است.</p>
             </div>
           </div>
         </div>
-
         <div class="tip-card">
           <div class="flex gap-3">
             <div class="tip-icon">۴</div>
@@ -656,7 +649,6 @@
             </div>
           </div>
         </div>
-
         <div class="tip-card">
           <div class="flex gap-3">
             <div class="tip-icon">۵</div>
@@ -666,18 +658,22 @@
             </div>
           </div>
         </div>
-
-        <div class="tip-card">
-          <div class="flex gap-3">
-            <div class="tip-icon">۶</div>
-            <div>
-              <p class="font-semibold text-indigo-200 mb-1">هشدار ایمنی</p>
-              <p class="text-slate-300 text-xs leading-relaxed">هرگز نفس را تا حد سرگیجه نگه‌دار. اگر احساس سرگیجه کردی، تمرین را متوقف کن و نفس‌های آرام بکش. این تمرین جایگزین آموزش معلم آواز نیست.</p>
-            </div>
-          </div>
-        </div>
-
       </div>
+    </div>
+  </section>
+
+  <!-- نمودار پیشرفت خطی (MACD / Moving Average) -->
+  <section class="glass p-5 mt-5">
+    <h2 class="font-bold text-lg mb-4 flex items-center gap-2">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      نمودار پیشرفت رکوردها (Moving Average)
+    </h2>
+    <div id="progressChartContainer" class="w-full bg-black/20 rounded-xl p-4 relative" style="height: 260px;">
+      <!-- SVG injected here -->
+    </div>
+    <div class="flex items-center gap-4 mt-3 text-xs text-slate-400 flex-wrap">
+      <div class="flex items-center gap-1.5"><span class="w-4 h-0.5 bg-indigo-400 inline-block"></span> طول هر رکورد (ثانیه)</div>
+      <div class="flex items-center gap-1.5"><span class="w-4 inline-block border-t-2 border-dashed border-cyan-400"></span> میانگین متحرک (۵ رکورد اخیر)</div>
     </div>
   </section>
 
@@ -723,43 +719,42 @@
 
 <script>
 // =====================================================
-//   Breath Master — تمرین تنفس آواز
+//   Breath Master Pro — تحلیل پیشرفته تنفس
 // =====================================================
 
 const $ = id => document.getElementById(id);
+const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+const toFa = n => String(n).replace(/\d/g, d => faDigits[+d]);
+const toFaNum = (n, dec=1) => toFa(Number(n).toFixed(dec));
 
 // وضعیت برنامه
 const state = {
   audioCtx:null, stream:null, source:null, analyser:null, dataArray:null,
-  micReady:false, listening:false, // آیا در حال گوش دادن برای دم است
-  recording:false, // آیا در حال ضبط یک نفس است
-  recStart:0, recEnd:0,
-  lastSoundTime:0, peakInRecord:0,
-  records:JSON.parse(localStorage.getItem('breath_records') || '[]'),
+  micReady:false, listening:false, 
+  recording:false, paused:false,
+  recStart:0, pauseStart:0, lastSoundTime:0, peakInRecord:0,
+  volHistory:[], // آرایه‌ای از ولوم در طول ضبط
+  records:JSON.parse(localStorage.getItem('breath_records_v2') || '[]'),
   threshold:parseFloat(localStorage.getItem('breath_threshold') || '0.05'),
-  silenceDelay:parseInt(localStorage.getItem('breath_silence') || '300'),
   mode:'free',
   metroOn:false, metroBpm:60, metroInterval:null, metroBeat:0,
   rafId:null,
   currentVol:0,
   smoothedVol:0,
-  armed:false, // آماده‌ی شروع رکورد بعدی (دکمه فشرده شده، منتظر دم)
-  autoResume:true
+  armed:false, autoResume:true
 };
 
-// تبدیل اعداد فارسی
-const faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-const toFa = n => String(n).replace(/\d/g, d => faDigits[+d]);
-const toFaNum = (n, dec=1) => toFa(Number(n).toFixed(dec));
+// مهاجرت رکوردهای قدیمی
+state.records = state.records.map(r => {
+  if(!r.volHistory) r.volHistory = [];
+  if(!r.consistency) r.consistency = 0;
+  return r;
+});
 
 // --- مدال میکروفون ---
-function showMicModal(){
-  $('micModal').classList.add('show');
-}
-function hideMicModal(){
-  $('micModal').classList.remove('show');
-  $('micSpinner').classList.add('hidden');
-}
+function showMicModal(){ $('micModal').classList.add('show'); }
+function hideMicModal(){ $('micModal').classList.remove('show'); $('micSpinner').classList.add('hidden'); }
+
  $('grantMicBtn').addEventListener('click', async () => {
   $('grantMicBtn').classList.add('hidden');
   $('cancelMicBtn').classList.add('hidden');
@@ -769,11 +764,10 @@ function hideMicModal(){
     hideMicModal();
     toast('میکروفون با موفقیت وصل شد ✓');
   }catch(e){
-    console.error(e);
     $('micSpinner').classList.add('hidden');
     $('grantMicBtn').classList.remove('hidden');
     $('cancelMicBtn').classList.remove('hidden');
-    toast('دسترسی میکروفون ناموفق بود. لطفاً از تنظیمات مرورگر اجازه بده.', 'err');
+    toast('دسترسی میکروفون ناموفق بود.', 'err');
   }
 });
  $('cancelMicBtn').addEventListener('click', hideMicModal);
@@ -782,11 +776,7 @@ function hideMicModal(){
 async function initMicrophone(){
   if(state.micReady) return;
   state.stream = await navigator.mediaDevices.getUserMedia({
-    audio:{
-      echoCancellation:false,
-      noiseSuppression:false,
-      autoGainControl:false
-    }
+    audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:false }
   });
   state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   state.source = state.audioCtx.createMediaStreamSource(state.stream);
@@ -797,14 +787,12 @@ async function initMicrophone(){
   state.dataArray = new Uint8Array(state.analyser.frequencyBinCount);
   state.micReady = true;
   
-  // آپدیت UI
   $('micDot').className = 'w-2 h-2 rounded-full bg-emerald-400';
   $('micDot').style.boxShadow = '0 0 8px rgba(52,211,153,0.8)';
   $('micStatusText').textContent = 'میکروفون فعال';
   $('micStatusText').className = 'text-emerald-300';
   $('startBtn').disabled = false;
   
-  // شروع حلقه تحلیل
   analyzeLoop();
 }
 
@@ -813,7 +801,6 @@ function analyzeLoop(){
   if(!state.micReady) return;
   state.analyser.getByteFrequencyData(state.dataArray);
   
-  // محاسبه RMS (انرژی سیگنال)
   let sum = 0;
   for(let i=0; i<state.dataArray.length; i++){
     const v = state.dataArray[i] / 255;
@@ -821,56 +808,71 @@ function analyzeLoop(){
   }
   const rms = Math.sqrt(sum / state.dataArray.length);
   
-  // برای حالت‌های SSS/SHH، فرکانس‌های بالا (هیس) را وزن بیشتری بدهیم
   let weightedRms = rms;
   if(state.mode === 'sss' || state.mode === 'shh'){
     let hiSum = 0, hiCount = 0;
-    // نیمه بالایی طیف = فرکانس‌های بالا
     const half = Math.floor(state.dataArray.length / 2);
     for(let i=half; i<state.dataArray.length; i++){
       const v = state.dataArray[i] / 255;
-      hiSum += v*v;
-      hiCount++;
+      hiSum += v*v; hiCount++;
     }
     const hiRms = Math.sqrt(hiSum / Math.max(1,hiCount));
     weightedRms = (rms * 0.4) + (hiRms * 0.6);
   }
   
   state.currentVol = weightedRms;
-  // هموارسازی
   state.smoothedVol = state.smoothedVol * 0.6 + weightedRms * 0.4;
   
-  // نمایش حجم زنده
-  const volPct = Math.min(100, state.smoothedVol * 100 * 3); // ضریب نمایش
+  const volPct = Math.min(100, state.smoothedVol * 100 * 3);
   $('volFill').style.height = volPct + '%';
   $('liveVolText').textContent = toFaNum(volPct, 0) + '٪';
   
-  // آپدیت موج صوتی
   updateWaveBars(state.dataArray);
   
-  // منطق تشخیص دم
   const now = performance.now();
   const isLoud = state.smoothedVol > state.threshold;
   
   if(state.listening){
     if(isLoud){
+      // اگر در حالت مکث بود، ادامه می‌دهیم
+      if(state.paused){
+        state.paused = false;
+        // جبران زمان مکث در تایمر
+        state.recStart += (now - state.pauseStart);
+        $('breathCore').classList.remove('paused','pause-pulse');
+        $('breathCore').classList.add('active');
+        $('statusBadge').textContent = 'ادامه ضبط...';
+        $('statusBadge').style.background = 'rgba(16,185,129,0.3)';
+      }
+      
       if(!state.recording){
-        // شروع ضبط
+        // شروع رکورد جدید
         state.recording = true;
         state.recStart = now;
         state.peakInRecord = 0;
-        $('breathCore').classList.remove('armed');
+        state.volHistory = [];
+        $('breathCore').classList.remove('armed','paused','pause-pulse');
         $('breathCore').classList.add('active');
-        $('breathCore').classList.add('recording-pulse');
         $('statusBadge').textContent = 'در حال ضبط دم...';
         $('statusBadge').style.background = 'rgba(16,185,129,0.3)';
       }
       state.lastSoundTime = now;
       state.peakInRecord = Math.max(state.peakInRecord, state.smoothedVol);
+      state.volHistory.push(state.smoothedVol);
     } else if(state.recording){
-      // صدای سکوت، چک کن آیا باید قطع شود
-      if(now - state.lastSoundTime > state.silenceDelay){
-        // پایان رکورد
+      // سکوت رخ داده
+      if(!state.paused && now - state.lastSoundTime > 300){ // 300ms تاخیر برای تشخیص مکث
+        // وارد حالت مکث ۳ ثانیه‌ای می‌شویم
+        state.paused = true;
+        state.pauseStart = state.lastSoundTime + 300; // شروع مکث از زمان قطع صدا
+        $('breathCore').classList.remove('active','armed');
+        $('breathCore').classList.add('paused','pause-pulse');
+        $('statusBadge').textContent = 'مکث ۳ ثانیه‌ای... ادامه بده یا تمام شود';
+        $('statusBadge').style.background = 'rgba(239,68,68,0.3)';
+      }
+      
+      if(state.paused && now - state.pauseStart > 3000){
+        // پایان مکث - نهایی کردن رکورد
         finalizeRecord();
       }
     }
@@ -878,13 +880,13 @@ function analyzeLoop(){
   
   // آپدیت تایمر زنده
   if(state.recording){
-    const elapsed = (now - state.recStart) / 1000;
+    const effectiveNow = state.paused ? state.pauseStart : now;
+    const elapsed = (effectiveNow - state.recStart) / 1000;
     updateTimerDisplay(elapsed);
-    // مقیاس دایره بر اساس صدا
+    
     const scale = 1 + Math.min(0.15, state.smoothedVol * 0.5);
     $('breathCore').style.transform = `scale(${scale})`;
   } else if(state.armed){
-    // حالت آماده — مقیاس متغیر برای تشویق
     const scale = 1 + Math.sin(now/300) * 0.03;
     $('breathCore').style.transform = `scale(${scale})`;
   } else {
@@ -894,7 +896,7 @@ function analyzeLoop(){
   state.rafId = requestAnimationFrame(analyzeLoop);
 }
 
-// --- موج صوتی ---
+// --- موج صوتی زنده ---
 const WAVE_BAR_COUNT = 40;
 function initWaveBars(){
   const c = $('waveBars');
@@ -929,33 +931,63 @@ function updateTimerDisplay(seconds){
   $('timerMs').textContent = '.' + toFa(String(ms).padStart(2,'0'));
 }
 
-// --- ثبت رکورد ---
+// --- محاسبه امتیاز یک‌دستی (Consistency) ---
+function calculateConsistency(vols){
+  if(!vols || vols.length < 10) return 0;
+  const mean = vols.reduce((a,b)=>a+b,0) / vols.length;
+  if(mean < state.threshold * 0.8) return 0; // صدا خیلی ضعیف بوده
+  
+  const variance = vols.reduce((a,b)=>a + Math.pow(b - mean, 2), 0) / vols.length;
+  const std = Math.sqrt(variance);
+  const cv = std / mean; // ضریب تغییرات
+  
+  // cv=0 یعنی صدا کاملا ثابت. cv=1 یعنی نوسان شدید.
+  const score = Math.max(0, Math.min(100, 100 - (cv * 80)));
+  return Math.round(score);
+}
+
+// --- Downsample Volume History ---
+function downsample(arr, maxLen=120){
+  if(arr.length <= maxLen) return arr;
+  const result = [];
+  const step = arr.length / maxLen;
+  for(let i=0; i<maxLen; i++){
+    result.push(arr[Math.floor(i*step)]);
+  }
+  return result;
+}
+
+// --- ثبت نهایی رکورد ---
 function finalizeRecord(){
   const duration = (state.lastSoundTime - state.recStart) / 1000;
   state.recording = false;
-  $('breathCore').classList.remove('active','recording-pulse');
+  state.paused = false;
+  $('breathCore').classList.remove('active','paused','pause-pulse');
   
-  if(duration >= 0.3){ // حداقل ۰.۳ ثانیه
+  if(duration >= 0.3){
+    const downsampledVol = downsample(state.volHistory);
     const rec = {
       id: Date.now(),
       duration: parseFloat(duration.toFixed(2)),
       mode: state.mode,
       peak: parseFloat(state.peakInRecord.toFixed(3)),
+      volHistory: downsampledVol,
+      consistency: calculateConsistency(state.volHistory),
       time: new Date().toISOString()
     };
     state.records.unshift(rec);
     if(state.records.length > 500) state.records.pop();
-    localStorage.setItem('breath_records', JSON.stringify(state.records));
+    localStorage.setItem('breath_records_v2', JSON.stringify(state.records));
     renderRecords();
     updateStats();
-    toast(`رکورد ثبت شد: ${toFaNum(duration,2)} ثانیه`);
+    renderProgressChart();
+    toast(`رکورد ثبت شد: ${toFaNum(duration,2)} ثانیه | یک‌دستی: ${toFa(rec.consistency)}٪`);
   } else {
-    toast('دستم خیلی کوتاه بود، ثبت نشد');
+    toast('صدا خیلی کوتاه بود، ثبت نشد');
   }
   
-  // بازگشت به حالت آماده برای رکورد بعدی (اگر کاربر دکمه‌ی ثبت بعدی زده بود)
+  // بازگشت به حالت آماده برای رکورد بعدی
   if(state.autoResume && state.armed){
-    // می‌خواهیم دوباره منتظر دم بماند
     $('statusBadge').textContent = 'منتظر دم بعدی...';
     $('statusBadge').style.background = 'rgba(245,158,11,0.3)';
     $('breathCore').classList.add('armed');
@@ -965,16 +997,12 @@ function finalizeRecord(){
   }
 }
 
-// --- شروع تمرین ---
+// --- دکمه‌ها ---
  $('startBtn').addEventListener('click', async () => {
-  if(!state.micReady){
-    showMicModal();
-    return;
-  }
+  if(!state.micReady){ showMicModal(); return; }
   if(state.audioCtx.state === 'suspended') await state.audioCtx.resume();
   
   if(!state.listening){
-    // شروع
     state.listening = true;
     state.armed = true;
     state.autoResume = true;
@@ -986,7 +1014,6 @@ function finalizeRecord(){
     $('breathCore').classList.add('armed');
     toast('تمرین شروع شد — یک دم عمیق بکش');
   } else {
-    // توقف
     if(state.recording) finalizeRecord();
     state.listening = false;
     state.armed = false;
@@ -994,17 +1021,17 @@ function finalizeRecord(){
     $('startBtn').innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>شروع تمرین';
     $('startBtn').className = 'btn btn-primary flex-1 min-w-[180px]';
     $('manualRecBtn').disabled = true;
-    $('breathCore').classList.remove('armed','active','recording-pulse');
+    $('breathCore').classList.remove('armed','active','paused','pause-pulse');
     $('statusBadge').textContent = 'متوقف شد';
     $('statusBadge').style.background = 'rgba(255,255,255,0.12)';
     updateTimerDisplay(0);
   }
 });
 
-// --- دکمه ثبت رکورد بعدی ---
  $('manualRecBtn').addEventListener('click', () => {
-  // اگر در حال ضبط است، قطع کن و بلافاصله آماده‌ی بعدی شو
   if(state.recording){
+    // پایان فوری رکورد فعلی
+    state.pauseStart = state.lastSoundTime; // جلوگیری از تاخیر
     finalizeRecord();
     state.armed = true;
     state.autoResume = true;
@@ -1026,20 +1053,9 @@ function finalizeRecord(){
   localStorage.setItem('breath_threshold', state.threshold);
 });
 
- $('silenceSlider').addEventListener('input', e => {
-  state.silenceDelay = parseInt(e.target.value);
-  $('silenceDelayVal').textContent = toFa(e.target.value) + 'ms';
-  localStorage.setItem('breath_silence', state.silenceDelay);
-});
-
-// کالیبراسیون خودکار
  $('autoCalibBtn').addEventListener('click', async () => {
-  if(!state.micReady){
-    showMicModal();
-    return;
-  }
+  if(!state.micReady){ showMicModal(); return; }
   toast('۳ ثانیه سکوت کن تا نویز پس‌زمینه اندازه‌گیری شود...');
-  // نمونه‌گیری ۳ ثانیه‌ای
   let maxBg = 0;
   const startT = performance.now();
   const wasListening = state.listening;
@@ -1050,8 +1066,7 @@ function finalizeRecord(){
       state.analyser.getByteFrequencyData(state.dataArray);
       let sum = 0;
       for(let i=0; i<state.dataArray.length; i++){
-        const v = state.dataArray[i]/255;
-        sum += v*v;
+        const v = state.dataArray[i]/255; sum += v*v;
       }
       const rms = Math.sqrt(sum/state.dataArray.length);
       if(rms > maxBg) maxBg = rms;
@@ -1061,7 +1076,6 @@ function finalizeRecord(){
     sample();
   });
   
-  // آستانه را کمی بالاتر از نویز پس‌زمینه تنظیم کن
   const newThreshold = Math.min(0.4, maxBg * 2.5 + 0.02);
   state.threshold = newThreshold;
   const sliderVal = Math.round(newThreshold * 100 * 10) / 10;
@@ -1085,15 +1099,42 @@ document.querySelectorAll('.mode-pill').forEach(p => {
 
 function updateModeTip(){
   const tips = {
-    free:{t:'حالت دم آزاد', d:'هر بار که در میکروفون هوا بدمی، تایمر خودکار شروع می‌شود و وقتی صدای دم قطع شد، رکورد ثبت می‌شود. دکمه «ثبت رکورد بعدی» برای شروع دستی رکورد بعدی است.'},
-    sss:{t:'صدای SSS (سوت)', d:'یک صدای کشیده «سسسسس» با فشار هوای ثابت تولید کن. سعی کن صدا نوسان نداشته باشد. این تمرین کنترل بازدم و پشتیبانی دیافراگم را تقویت می‌کند.'},
-    shh:{t:'صدای SHH (شش)', d:'صدای «شششش» را با فشار هوای یکنواخت تولید کن. این تمرین برای کنترل جریان هوا و کاهش تنش حنجره عالی است.'},
-    lip:{t:'لب‌تریل (Lip Trill)', d:'لب‌ها را نیمه‌باز نگه‌دار و هوا را با لرزش آن‌ها خارج کن. صدای «ببببب». این تمرین رهاسازی تنش عضلانی و گرم‌کردن صدا است.'},
-    hold:{t:'نگه‌داشتن دم', d:'دم عمیق بکش و نفس را نگه‌دار. تایمر تا وقتی نفس را نگه داشته‌ای (بدون صدای بلند) شمارش می‌کند. این تمرین ظرفیت ریوی را افزایش می‌دهد — اما تا حد سرگیجه نرو!'}
+    free:{t:'حالت دم آزاد', d:'هر بار که در میکروفون هوا بدمی، تایمر خودکار شروع می‌شود و وقتی صدای دم قطع شد، ۳ ثانیه فرصت داری ادامه بدی. در غیر این صورت رکورد ثبت می‌شود.'},
+    sss:{t:'صدای SSS (سوت)', d:'یک صدای کشیده «سسسسس» با فشار هوای ثابت تولید کن. امتیاز یک‌دستی بالاتر می‌شود اگر نمودار ولوم صاف باشد.'},
+    shh:{t:'صدای SHH (شش)', d:'صدای «شششش» را با فشار هوای یکنواخت تولید کن. این تمرین برای کنترل جریان هوا عالی است.'},
+    lip:{t:'لب‌تریل (Lip Trill)', d:'لب‌ها را نیمه‌باز نگه‌دار و هوا را با لرزش آن‌ها خارج کن. صدای «ببببب». این تمرین رهاسازی تنش است.'},
+    hold:{t:'نگه‌داشتن دم', d:'دم عمیق بکش و نفس را نگه‌دار. تایمر تا وقتی نفس را نگه داشته‌ای شمارش می‌کند. این تمرین ظرفیت ریوی را افزایش می‌دهد.'}
   };
   const tip = tips[state.mode];
   $('modeTip').querySelector('.font-semibold').textContent = tip.t;
   $('modeTip').querySelector('.text-slate-300').textContent = tip.d;
+}
+
+// --- SVG Mini Volume Graph Generator ---
+function renderVolGraph(vols){
+  if(!vols || vols.length === 0) return '';
+  const maxVol = Math.max(...vols, state.threshold * 1.2);
+  const w = 100, h = 24;
+  let pathD = `M 0 ${h - (vols[0]/maxVol)*h}`;
+  let areaD = `M 0 ${h} L 0 ${h - (vols[0]/maxVol)*h}`;
+  
+  for(let i=1; i<vols.length; i++){
+    const y = h - (vols[i]/maxVol)*h;
+    const x = (i/(vols.length-1))*w;
+    pathD += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
+    areaD += ` L ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }
+  areaD += ` L ${w} ${h} Z`;
+  
+  const threshY = h - (state.threshold/maxVol)*h;
+  
+  return `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="w-full h-full" style="display:block">
+      <path d="${areaD}" fill="rgba(34,211,238,0.15)" stroke="none" />
+      <line x1="0" y1="${threshY.toFixed(2)}" x2="${w}" y2="${threshY.toFixed(2)}" stroke="rgba(245,158,11,0.4)" stroke-width="0.5" stroke-dasharray="1 1" />
+      <path d="${pathD}" fill="none" stroke="#22d3ee" stroke-width="1" vector-effect="non-scaling-stroke" />
+    </svg>
+  `;
 }
 
 // --- نمایش رکوردها ---
@@ -1108,27 +1149,33 @@ function renderRecords(){
   
   list.innerHTML = state.records.map((r, idx) => {
     const isBest = r.duration === best;
-    const isImp = idx > 0 && r.duration > state.records[idx-1].duration;
     const date = new Date(r.time);
     const timeStr = date.toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
     const modeLabel = {free:'دم آزاد', sss:'SSS', shh:'SHH', lip:'لب‌تریل', hold:'نگه‌داشتن'}[r.mode] || r.mode;
+    const consistClass = r.consistency > 80 ? 'badge-imp' : (r.consistency > 50 ? 'badge-info' : 'badge-warn');
+    
     return `
-      <div class="record-item ${isBest?'best':''} flex items-center gap-3">
-        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${isBest?'bg-amber-500/20 text-amber-300':'bg-indigo-500/10 text-indigo-300'}">
-          ${toFa(state.records.length - idx)}
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-baseline gap-2">
-            <span class="text-xl font-black font-mono ${isBest?'text-amber-300':'text-white'}">${toFaNum(r.duration, 2)}</span>
-            <span class="text-xs text-slate-500">ثانیه</span>
-            ${isBest?'<span class="badge badge-best">بهترین</span>':''}
-            ${isImp?'<span class="badge badge-imp">↑ بهتر</span>':''}
+      <div class="record-item ${isBest?'best':''}">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${isBest?'bg-amber-500/20 text-amber-300':'bg-indigo-500/10 text-indigo-300'}">
+            ${toFa(state.records.length - idx)}
           </div>
-          <div class="text-xs text-slate-500 mt-0.5">${modeLabel} • ${timeStr}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline gap-2 flex-wrap">
+              <span class="text-xl font-black font-mono ${isBest?'text-amber-300':'text-white'}">${toFaNum(r.duration, 2)}</span>
+              <span class="text-xs text-slate-500">ثانیه</span>
+              ${isBest?'<span class="badge badge-best">بهترین</span>':''}
+              <span class="badge ${consistClass}">یک‌دستی: ${toFa(r.consistency)}٪</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-0.5">${modeLabel} • ${timeStr}</div>
+          </div>
+          <button onclick="deleteRecord(${r.id})" class="flex-shrink-0 w-7 h-7 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 transition flex items-center justify-center" title="حذف">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
         </div>
-        <button onclick="deleteRecord(${r.id})" class="flex-shrink-0 w-7 h-7 rounded-lg bg-red-500/10 text-red-300 hover:bg-red-500/20 transition flex items-center justify-center" title="حذف">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
-        </button>
+        <div class="w-full h-6 bg-black/30 rounded overflow-hidden relative">
+          ${renderVolGraph(r.volHistory)}
+        </div>
       </div>
     `;
   }).join('');
@@ -1136,11 +1183,96 @@ function renderRecords(){
 
 window.deleteRecord = id => {
   state.records = state.records.filter(r => r.id !== id);
-  localStorage.setItem('breath_records', JSON.stringify(state.records));
+  localStorage.setItem('breath_records_v2', JSON.stringify(state.records));
   renderRecords();
   updateStats();
+  renderProgressChart();
   toast('رکورد حذف شد');
 };
+
+// --- محاسبه میانگین متحرک ---
+function movingAverage(data, windowSize){
+  const result = [];
+  for(let i=0; i<data.length; i++){
+    const start = Math.max(0, i - windowSize + 1);
+    const slice = data.slice(start, i+1);
+    const avg = slice.reduce((a,b)=>a+b,0) / slice.length;
+    result.push(avg);
+  }
+  return result;
+}
+
+// --- نمودار پیشرفت خطی ---
+function renderProgressChart(){
+  const container = $('progressChartContainer');
+  if(state.records.length === 0){
+    container.innerHTML = `<div class="w-full h-full flex items-center justify-center text-slate-500 text-sm">برای دیدن نمودار، حداقل یک رکورد ثبت کنید.</div>`;
+    return;
+  }
+  
+  const recs = [...state.records].reverse(); // قدیمی به جدید (چپ به راست)
+  const durations = recs.map(r => r.duration);
+  const maxDur = Math.max(...durations, 5);
+  const w = 1000, h = 200;
+  const padX = 30, padY = 20;
+  const innerW = w - padX*2, innerH = h - padY*2;
+  
+  const stepX = recs.length > 1 ? innerW / (recs.length - 1) : 0;
+  
+  // نقاط خط اصلی
+  let points = [];
+  for(let i=0; i<recs.length; i++){
+    const x = padX + i * stepX;
+    const y = padY + innerH - (durations[i]/maxDur) * innerH;
+    points.push({x, y, dur: durations[i]});
+  }
+  
+  // مسیر خط
+  let pathD = points.length > 0 ? `M ${points[0].x} ${points[0].y}` : '';
+  for(let i=1; i<points.length; i++) pathD += ` L ${points[i].x} ${points[i].y}`;
+  
+  // مسیر زیر خط (Area)
+  let areaD = pathD + ` L ${points[points.length-1].x} ${padY+innerH} L ${points[0].x} ${padY+innerH} Z`;
+  
+  // خط میانگین متحرک
+  const maData = movingAverage(durations, 5);
+  let maPath = '';
+  let maPoints = [];
+  for(let i=0; i<recs.length; i++){
+    const x = padX + i * stepX;
+    const y = padY + innerH - (maData[i]/maxDur) * innerH;
+    maPoints.push({x, y});
+  }
+  if(maPoints.length > 0){
+    maPath = `M ${maPoints[0].x} ${maPoints[0].y}`;
+    for(let i=1; i<maPoints.length; i++) maPath += ` L ${maPoints[i].x} ${maPoints[i].y}`;
+  }
+  
+  // خطوط شبکه
+  let grid = '';
+  for(let i=0; i<=4; i++){
+    const y = padY + (innerH/4)*i;
+    const val = maxDur - (maxDur/4)*i;
+    grid += `<line x1="${padX}" y1="${y}" x2="${w-padX}" y2="${y}" stroke="rgba(255,255,255,0.05)" />`;
+    grid += `<text x="${padX-5}" y="${y+4}" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="end" font-family="Vazirmatn">${toFaNum(val,0)}</text>`;
+  }
+  
+  // نقاط داده
+  let dots = '';
+  points.forEach((p, i) => {
+    dots += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="#818cf8" stroke="#070b18" stroke-width="1.5" />`;
+  });
+  
+  container.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" class="w-full h-full" preserveAspectRatio="none">
+      ${grid}
+      <path d="${areaD}" fill="rgba(99,102,241,0.15)" />
+      <path d="${pathD}" fill="none" stroke="#818cf8" stroke-width="2" vector-effect="non-scaling-stroke" />
+      ${maPath ? `<path d="${maPath}" fill="none" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" />` : ''}
+      ${dots}
+    </svg>
+  `;
+}
 
 // --- آمار ---
 function updateStats(){
@@ -1148,71 +1280,41 @@ function updateStats(){
     $('statBest').textContent = '۰٫۰';
     $('statAvg').textContent = '۰٫۰';
     $('statCount').textContent = '۰';
-    $('statTotal').textContent = '۰٫۰';
-    $('trendVal').textContent = '—';
-    $('trendBar').style.width = '0%';
+    $('statConsist').textContent = '۰٪';
     return;
   }
   
   const durations = state.records.map(r => r.duration);
+  const consistencies = state.records.map(r => r.consistency);
   const best = Math.max(...durations);
   const avg = durations.reduce((a,b)=>a+b,0) / durations.length;
-  const total = durations.reduce((a,b)=>a+b,0);
+  const avgConsist = consistencies.reduce((a,b)=>a+b,0) / consistencies.length;
   
   $('statBest').textContent = toFaNum(best, 1);
   $('statAvg').textContent = toFaNum(avg, 1);
   $('statCount').textContent = toFa(state.records.length);
-  $('statTotal').textContent = toFaNum(total, 1);
-  
-  // روند ۵ رکورد اخیر
-  const recent = state.records.slice(0, 5).map(r => r.duration).reverse();
-  if(recent.length >= 2){
-    const half = Math.floor(recent.length/2);
-    const firstAvg = recent.slice(0, half).reduce((a,b)=>a+b,0) / Math.max(1,half);
-    const secondAvg = recent.slice(half).reduce((a,b)=>a+b,0) / Math.max(1, recent.length-half);
-    const diff = secondAvg - firstAvg;
-    const pct = Math.min(100, Math.max(0, (diff / Math.max(0.1, firstAvg)) * 100));
-    $('trendBar').style.width = pct + '%';
-    if(diff > 0.1){
-      $('trendVal').textContent = '↑ ' + toFaNum(diff, 1) + 'ثانیه';
-      $('trendVal').className = 'font-bold text-emerald-400';
-      $('trendBar').className = 'h-full bg-gradient-to-l from-emerald-400 to-cyan-400 transition-all';
-    } else if(diff < -0.1){
-      $('trendVal').textContent = '↓ ' + toFaNum(Math.abs(diff), 1) + 'ثانیه';
-      $('trendVal').className = 'font-bold text-rose-400';
-      $('trendBar').className = 'h-full bg-gradient-to-l from-rose-400 to-orange-400 transition-all';
-    } else {
-      $('trendVal').textContent = 'پایدار';
-      $('trendVal').className = 'font-bold text-slate-300';
-    }
-  } else {
-    $('trendVal').textContent = 'به رکوردهای بیشتری نیاز است';
-    $('trendVal').className = 'font-bold text-slate-400 text-xs';
-    $('trendBar').style.width = '0%';
-  }
+  $('statConsist').textContent = toFaNum(avgConsist, 0) + '٪';
 }
 
-// --- پاک کردن همه ---
+// --- پاک کردن ---
  $('clearBtn').addEventListener('click', () => $('clearModal').classList.add('show'));
  $('cancelClearBtn').addEventListener('click', () => $('clearModal').classList.remove('show'));
  $('confirmClearBtn').addEventListener('click', () => {
   state.records = [];
-  localStorage.setItem('breath_records', '[]');
+  localStorage.setItem('breath_records_v2', '[]');
   renderRecords();
   updateStats();
+  renderProgressChart();
   $('clearModal').classList.remove('show');
   toast('همه رکوردها پاک شدند');
 });
 
 // --- خروجی CSV ---
  $('exportBtn').addEventListener('click', () => {
-  if(state.records.length === 0){
-    toast('رکوردی برای خروجی وجود ندارد');
-    return;
-  }
-  const csv = ['#,date,mode,duration_sec,peak_volume\n'];
-  state.records.slice().reverse().forEach(r => {
-    csv.push(`${r.id},${r.time},${r.mode},${r.duration},${r.peak}\n`);
+  if(state.records.length === 0){ toast('رکوردی برای خروجی وجود ندارد'); return; }
+  const csv = ['#,date,mode,duration_sec,peak_volume,consistency_score\n'];
+  state.records.slice().reverse().forEach((r, idx) => {
+    csv.push(`${idx+1},${r.time},${r.mode},${r.duration},${r.peak},${r.consistency}\n`);
   });
   const blob = new Blob(csv, {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
@@ -1227,16 +1329,12 @@ function updateStats(){
 // --- مترونوم ---
  $('metroToggle').addEventListener('change', e => {
   state.metroOn = e.target.checked;
-  if(state.metroOn) startMetronome();
-  else stopMetronome();
+  if(state.metroOn) startMetronome(); else stopMetronome();
 });
  $('bpmSlider').addEventListener('input', e => {
   state.metroBpm = parseInt(e.target.value);
   $('bpmVal').textContent = toFa(e.target.value);
-  if(state.metroOn){
-    stopMetronome();
-    startMetronome();
-  }
+  if(state.metroOn){ stopMetronome(); startMetronome(); }
 });
 function startMetronome(){
   const interval = 60000 / state.metroBpm;
@@ -1245,7 +1343,6 @@ function startMetronome(){
     const dots = ['dot1','dot2','dot3','dot4'];
     dots.forEach(d => $(d).classList.remove('active'));
     $(dots[state.metroBeat % 4]).classList.add('active');
-    // بیپ ملایم
     if(state.audioCtx){
       const osc = state.audioCtx.createOscillator();
       const gain = state.audioCtx.createGain();
@@ -1289,19 +1386,16 @@ function toast(msg, type='ok'){
 
 // --- مقداردهی اولیه ---
 function init(){
-  // بارگذاری مقادیر ذخیره‌شده
   $('thresholdSlider').value = state.threshold * 100;
   $('thresholdVal').textContent = toFaNum(state.threshold * 100, 1) + '٪';
   $('thresholdLine').style.bottom = (state.threshold * 100 * 3) + '%';
-  $('silenceSlider').value = state.silenceDelay;
-  $('silenceDelayVal').textContent = toFa(state.silenceDelay) + 'ms';
   
   initWaveBars();
   renderRecords();
   updateStats();
+  renderProgressChart();
   updateModeTip();
   
-  // نمایش مدال میکروفون در ابتدا
   setTimeout(() => showMicModal(), 500);
 }
 
